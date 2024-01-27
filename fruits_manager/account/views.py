@@ -4,7 +4,6 @@ from django.contrib.auth import login
 
 
 def signup_view(request):
-    path = 'signup.html'
 
     if request.method == 'POST':
 
@@ -18,7 +17,7 @@ def signup_view(request):
     param = {
         'form': form
     }
-    return render(request, path, param)
+    return render(request, 'signup.html', param)
 
 def login_view(request):
     if request.method == 'POST':
