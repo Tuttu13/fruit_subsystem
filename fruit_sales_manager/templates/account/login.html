@@ -1,0 +1,28 @@
+<!---templates/login.html----->
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block customcss %}
+<link rel="stylesheet" href="{% static 'loginform.css' %}">
+{% endblock customcss %}
+
+{% block title %}
+<title>ログイン画面</title>
+{% endblock title %}
+
+{% block content %}
+
+<body class="text-center">
+    <div class="container">
+        <form class="form-signin" method="POST">{% csrf_token %}
+            <h1 class="h3 mb-3 fw-normal">ログイン画面</h1>
+            <label for="inputEmail" class="visually-hidden">メールアドレス</label>
+            <input type="text" id="inputEmail" class="form-control" placeholder="ユーザ名" name="username" requiredautofocus>
+            <label for="inputPassword" class="visually-hidden">パスワード</label>
+            <input type="password" id="inputPassword" class="form-control" placeholder="パスワード" name="password" required>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">ログイン</button>
+        </form>
+    </div>
+</body>
+{% endblock content %}
