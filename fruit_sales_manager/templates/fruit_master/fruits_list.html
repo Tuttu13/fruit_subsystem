@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<H2>果物マスタ管理</H2>
+<div>
+    <a href="{% url 'index' %}">TOP</a> > 果物マスタ管理
+</div>
+
+{% if user.is_authenticated %}
+<table class="table table-striped">
+    <thead>
+        <th scope="col">ID</th>
+        <th scope="col">名称</th>
+        <th scope="col">単価</th>
+        <th scope="col">登録日時</th>
+        <th scope="col">編集/削除</th>
+    </thead>
+    
+    <tbody>
+        {% for item in object_list %}
+        <tr class="table-active">
+            <td>{{ item.fruit_id }}</td>
+            <td>{{ item.fruit_name }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.created_at }}</td>
+            <td>
+                <div class="d-flex flex-column flex-md-row gap-2">
+                    <form method="post" action="{% url 'update' item.fruit_id %}">{% csrf_token %}
+                        <button class="btn btn-primary" type="submit">編集</button>
+                    </form>
+                    <form method="post" action="{% url 'delete' item.fruit_id %}">{% csrf_token %}
+                        <button class="btn btn-danger" type="submit">削除</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="text-end">
+    <a href="{% url 'create' %}" class="btn btn-primary">新規登録</a>
+</div>
+{% else %}
+<a href="{% url 'login' %}">ログイン</a>
+{% endif %}
+
+{% endblock content %}
