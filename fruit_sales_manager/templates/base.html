@@ -19,16 +19,30 @@
     {% block title %}
     <title>果物販売管理</title>
     {% endblock title %}
+
+    <style>
+        body {
+            padding-top: 100px;
+        }
+    </style>
+
 </head>
 
 <body>
 
     {% block header %}
-    <h1>果物販売管理</h1>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">果物販売管理</a>
+        </div>
+    </nav>
     {% endblock header %}
 
     {% block content %}
     {% endblock content %}
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 </body>
 </html>

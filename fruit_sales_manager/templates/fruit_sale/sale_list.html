@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<H2>販売情報管理</H2>
+<div>
+    <a href="{% url 'index' %}">TOP</a> > 販売情報管理
+</div>
+
+{% if user.is_authenticated %}
+<table class="table table-striped">
+    <thead>
+        <th scope="col">果物</th>
+        <th scope="col">個数</th>
+        <th scope="col">売り上げ</th>
+        <th scope="col">販売日時</th>
+        <th scope="col">編集</th>
+        <th scope="col">削除</th>
+    </thead>
+    
+    <tbody>
+        {% for item in object_list %}
+        <tr class="table-active">
+            <td>
+                {{ item.fruit_name }} 
+            </td>
+            <td>{{ item.sales }}</td>
+            <td>{{ item.total }}</td>
+            <td>{{ item.sales_at }}</td>
+            <td>
+                <div class="d-flex flex-column flex-md-row gap-2">
+                    <form method="post" action="{% url 'saleupdate' item.id %}">{% csrf_token %}
+                        <button class="btn btn-primary" type="submit">編集</button>
+                    </form>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex flex-column flex-md-row gap-2"></div>
+                <form method="post" action="{% url 'saledelete' item.id %}">{% csrf_token %}
+                        <button class="btn btn-danger" type="submit">削除</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="text-end">
+    <a href="{% url 'salecreate' %}" class="btn btn-primary">販売情報登録</a>
+</div>
+<div>
+    <h3>CSV一括登録</h3>
+    <form action="{% url 'import' %}" method='POST' enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="form-data" accept="csv" required>
+    <button type="submit" class="btn btn-primary">CSVアップロード</button>
+    </form>
+</div>
+
+{% else %}
+<a href="{% url 'login' %}">ログイン</a>
+{% endif %}
+
+{% endblock content %}
