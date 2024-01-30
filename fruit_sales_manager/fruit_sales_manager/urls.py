@@ -4,6 +4,6 @@ import account
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('account/', include('account.urls')),
+    path('', include('account.urls')),
     path('fruitapp/', include('fruit_app.urls')),
 ]
