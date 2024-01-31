@@ -1,6 +1,5 @@
 from .forms import FruitForm
 from .models import FruitsMaster
-from django.shortcuts import render
 
 # クラスベース
 from django.contrib.auth.mixins import LoginRequiredMixin
