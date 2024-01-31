@@ -29,9 +29,7 @@
             <td>{{ item.sales_at }}</td>
             <td>
                 <div class="d-flex flex-column flex-md-row gap-2">
-                    <form method="post" action="{% url 'saleupdate' item.id %}">{% csrf_token %}
-                        <button class="btn btn-primary" type="submit">編集</button>
-                    </form>
+                    <a href="{% url 'saleupdate' item.id %}" class="btn btn-primary">編集</a>
                 </div>
             </td>
             <td>
