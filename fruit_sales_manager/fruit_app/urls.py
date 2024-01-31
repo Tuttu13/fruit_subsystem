@@ -11,10 +11,8 @@ urlpatterns = [
     path('delete/<int:pk>', fruit_views.FruitDeleteView.as_view(), name='delete'),
     # 果物販売情報
     path('sales', sale_views.SaleListView.as_view(), name='sales'),
-    # path('salecreate', sale_views.SaleCreateView.as_view(), name='salecreate'),
     path('salecreate', sale_views.createsale, name='salecreate'),
     path('saleupdate/<int:pk>', sale_views.editsale, name='saleupdate'),
-    # path('saleupdate/<int:pk>', sale_views.SaleUpdateView.as_view(), name='saleupdate'),
     path('saledelete/<int:pk>', sale_views.SaleDeleteView.as_view(), name='saledelete'),
     path('import/', views.csvimport, name='import'),
     # 販売統計情報
