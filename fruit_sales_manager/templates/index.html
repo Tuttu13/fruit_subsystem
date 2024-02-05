@@ -5,14 +5,19 @@
 {% endblock title %}
 
 {% block content %}
-<h2>管理TOP</h2>
-<a href="{% url 'list' %}">
-  果物マスタ管理
-</a><br>
-<a href="{% url 'sales' %}">
-    販売情報管理
-</a><br>
-<a href="">
-    販売統計情報
-</a>
+<body class="text-center">
+  <h1>管理TOP</h1>
+  <br>
+  <a href="{% url 'list' %}">
+    果物マスタ管理
+  </a><br>
+  <br>
+  <a href="{% url 'sales' %}">
+      販売情報管理
+  </a><br>
+  <br>
+  <a href="{% url 'statistics' %}">
+      販売統計情報
+  </a>
+</body>
 {% endblock content %}
