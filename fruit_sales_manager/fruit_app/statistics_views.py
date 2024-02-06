@@ -19,14 +19,29 @@ class SaleListView(LoginRequiredMixin,ListView):
         return context
 
 class GetContext():
+    """コンテクストデータの取得クラス
+        累計金額取得
+        3か月分の月別データ取得
+        3日分の日別データ取得
+        
+    """
 
     def get_total_profit():
+        """累計金額取得
+
+        Returns:
+            int: 累計金額
+        """
         df_salesinfo = GetContext._get_df_all_sales_info()
         total_profit = df_salesinfo.total.sum(axis=0)
         return total_profit
     
     def get_3months_sales():
+        """3か月分の月別データ取得
 
+        Returns:
+            list: 3か月分の月別データ
+        """
         # 販売情報データ全取得
         dateidx_df = GetContext._get_salese_info_df()
 
@@ -46,10 +61,10 @@ class GetContext():
         monthly_total_list = GetContext._get_monthly_total_amount_list(check_monthly_list, monthly_total_dict)
 
         # 各月内訳生成
-        data0, data1, data2 = GetContext._divide_sales_info(monthly_dict, check_monthly_list)
+        data0, data1, data2 = GetContext._divide_sales_info_3m(monthly_dict, check_monthly_list)
 
         # 各月内訳成形
-        data_str1, data_str2, data_str3 = GetContext._data_formatter(data0, data1, data2)
+        data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
 
         onemonth = {'month': check_monthly_list[-1], 'all': monthly_total_list[-1], 'detail': data_str1}
         twomonth = {'month': check_monthly_list[-2], 'all': monthly_total_list[-2], 'detail': data_str2}
@@ -64,6 +79,11 @@ class GetContext():
         return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
     
     def get_3days_sales():
+        """3日分の日別データ取得
+
+        Returns:
+            list: 3日分の日別データ
+        """
         
         # 販売情報データ全取得
         dateidx_df = GetContext._get_salese_info_df()
@@ -78,79 +98,25 @@ class GetContext():
         monthly_total_dict = del_df.to_dict(orient='index')
 
         # 各月日判定用データ
-        check_data = dately_df.index.levels[1]
-        check_list = []
-        for check_data in check_data:
-            target = check_data.strftime('%Y/%m/%d')
-            check_list.append(target)
+        check_dately_list = GetContext._get_check_dately_list(dately_df)
 
         # 日別売上総額
-        dately_total_list = []
-        for i in monthly_total_dict:
-            total = monthly_total_dict.get(i)
-            check_time = i.strftime('%Y/%m/%d')
-            if check_time == check_list[-1]:
-                dately_total_list.append(total['total'])
-            if check_time == check_list[-2]:
-                dately_total_list.append(total['total'])
-            if check_time == check_list[-3]:
-                dately_total_list.append(total['total'])
-            else:
-                pass
-
-        data0 = []
-        data1 = []
-        data2 = []
+        dately_total_list = GetContext._get_dately_total_list(check_dately_list, monthly_total_dict)
 
         chenge_dict = dict(reversed(dately_dict.items()))
 
-        for i in chenge_dict:
-            data = chenge_dict.get(i)
-            time = i[1].strftime('%Y/%m/%d')
-            if time == check_list[-1]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                if name == 0:
-                    text_data = ' 0円(0)'
-                else:
-                    text_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data0.append(text_data)
-            if time == check_list[-2]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                if name == 0:
-                    text1_data = ' 0円(0)'
-                else:
-                    text1_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data1.append(text1_data)
-            if time == check_list[-3]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                if name == 0:
-                    text2_data = ' 0円(0)'
-                else:
-                    text2_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data2.append(text2_data)
-            else:
-                pass
+        data0, data1, data2 = GetContext._divide_sales_info_3d(chenge_dict, check_dately_list)
 
-        data_str1, data_str2, data_str3 = GetContext._data_formatter(data0, data1, data2)
+        data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
 
-        oneday = {
-            'month': check_list[-1], 'all': dately_total_list[-1], 'detail': data_str1
-        }
-        twoday = {
-            'month': check_list[-2], 'all': dately_total_list[-2], 'detail': data_str2
-        }
-        threeday = {
-            'month': check_list[-3], 'all': dately_total_list[-3], 'detail': data_str3
-        }
+        oneday = {'month': check_dately_list[-1], 'all': dately_total_list[-1], 'detail': data_str1}
+        twoday = {'month': check_dately_list[-2], 'all': dately_total_list[-2], 'detail': data_str2}
+        threeday = {'month': check_dately_list[-3], 'all': dately_total_list[-3], 'detail': data_str3}
 
         threemonth_list = [
-            oneday, twoday, threeday
+            oneday, 
+            twoday, 
+            threeday
         ]
         
         return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
@@ -213,7 +179,7 @@ class GetContext():
 
         return monthly_total_amount_list
 
-    def _divide_sales_info(monthly_dict:dict, check_monthly_list:list):
+    def _divide_sales_info_3m(monthly_dict:dict, check_monthly_list:list):
         
         data0 = []
         data1 = []
@@ -243,9 +209,82 @@ class GetContext():
                 pass
 
         return data0, data1, data2
+    
+    def _get_check_dately_list(dately_df:pd.DataFrame):
 
-    def _data_formatter(data0:list, data1:list, data2:list):
+        check_data = dately_df.index.levels[1]
+        
+        check_dately_list = []
+        for check_data in check_data:
+            target = check_data.strftime('%Y/%m/%d')
+            check_dately_list.append(target)
+
+        return check_dately_list
+    
+    def _get_dately_total_list(check_dately_list, monthly_total_dict):
+
+        dately_total_list = []
+        for i in monthly_total_dict:
+            total = monthly_total_dict.get(i)
+            check_time = i.strftime('%Y/%m/%d')
+            if check_time == check_dately_list[-1]:
+                dately_total_list.append(total['total'])
+            if check_time == check_dately_list[-2]:
+                dately_total_list.append(total['total'])
+            if check_time == check_dately_list[-3]:
+                dately_total_list.append(total['total'])
+            else:
+                pass
+
+        return dately_total_list
+    
+    def _divide_sales_info_3d(chenge_dict, check_dately_list):
+        data0 = []
+        data1 = []
+        data2 = []
+        for i in chenge_dict:
+            data = chenge_dict.get(i)
+            time = i[1].strftime('%Y/%m/%d')
+            if time == check_dately_list[-1]:
+                name = data['fruit_name']
+                total = str(data['total'])
+                sales = str(data['sales'])
+                if name == 0:
+                    text_data = ' 0円(0)'
+                else:
+                    text_data = ' {0}:{1}円({2})'.format(name, total, sales)
+                data0.append(text_data)
+            if time == check_dately_list[-2]:
+                name = data['fruit_name']
+                total = str(data['total'])
+                sales = str(data['sales'])
+                if name == 0:
+                    text1_data = ' 0円(0)'
+                else:
+                    text1_data = ' {0}:{1}円({2})'.format(name, total, sales)
+                data1.append(text1_data)
+            if time == check_dately_list[-3]:
+                name = data['fruit_name']
+                total = str(data['total'])
+                sales = str(data['sales'])
+                if name == 0:
+                    text2_data = ' 0円(0)'
+                else:
+                    text2_data = ' {0}:{1}円({2})'.format(name, total, sales)
+                data2.append(text2_data)
+            else:
+                pass
+        
+        return data0, data1, data2
+
+    def _cmn_data_formatter(data0:list, data1:list, data2:list):
         """内訳詳細の不要な文字列を整形
+
+            以下の4つの付与な文字列削除
+                [: 左角かっこ
+                ]: 右角かっこ
+                ': シングルクォート
+                ,: カンマ
 
         Args:
             data0 (list): 1つ目のデータ
