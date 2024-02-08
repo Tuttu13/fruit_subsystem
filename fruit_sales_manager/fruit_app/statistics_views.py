@@ -42,43 +42,51 @@ class GetContext():
         Returns:
             list: 3か月分の月別データ
         """
-        # 販売情報データ全取得
-        dateidx_df = GetContext._get_salese_info_df()
 
-        # TODO 月別各果物集計
-        # 空のデータフレームだった場合、例外発生
-        if dateidx_df.empty:
+        format_flg = 'monthly'
+
+        try:
+
+            # 販売情報データ全取得
+            dateidx_df = GetContext._get_salese_info_df()
+
+            # 月別各果物集計
+            if dateidx_df.empty:
+                return None
+            else:
+                monthly_df = dateidx_df.groupby('fruit_name').resample("M").sum()
+                monthly_dict = monthly_df.to_dict(orient='index')
+
+            # 各月別の売上金額
+            monthly_total_df = dateidx_df.resample("M").sum()
+            del_df = monthly_total_df.drop(['fruit_name', 'sales'], axis=1)
+            monthly_total_dict = del_df.to_dict(orient='index')
+
+            # 各月日判定用データ
+            check_monthly_list = GetContext._get_check_list(format_flg, monthly_df)
+
+            # 各月売上総額
+            monthly_total_list = GetContext._get_total_amount_list(format_flg, check_monthly_list, monthly_total_dict)
+
+            # 各月内訳生成
+            data0, data1, data2 = GetContext._divide_sales_info(format_flg, monthly_dict, check_monthly_list)
+
+            # 各月内訳成形
+            data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
+
+            onemonth, twomonth, threemonth = GetContext._create_row(check_monthly_list, monthly_total_list, data_str1, data_str2, data_str3)
+
+            threemonth_list = [
+                onemonth,
+                twomonth,
+                threemonth
+            ]
+
+            return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
+        
+        except Exception as e:
+            print(e)
             return None
-        else:
-            monthly_df = dateidx_df.groupby('fruit_name').resample("M").sum()
-            monthly_dict = monthly_df.to_dict(orient='index')
-
-        # 各月別の売上金額
-        monthly_total_df = dateidx_df.resample("M").sum()
-        del_df = monthly_total_df.drop(['fruit_name', 'sales'], axis=1)
-        monthly_total_dict = del_df.to_dict(orient='index')
-
-        # 各月日判定用データ
-        check_monthly_list = GetContext._get_check_monthly_list(monthly_df)
-
-        # 各月売上総額
-        monthly_total_list = GetContext._get_monthly_total_amount_list(check_monthly_list, monthly_total_dict)
-
-        # 各月内訳生成
-        data0, data1, data2 = GetContext._divide_sales_info_3m(monthly_dict, check_monthly_list)
-
-        # 各月内訳成形
-        data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
-
-        onemonth, twomonth, threemonth = GetContext._create_row(check_monthly_list, monthly_total_list, data_str1, data_str2, data_str3)
-
-        threemonth_list = [
-            onemonth,
-            twomonth,
-            threemonth
-        ]
-
-        return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
     
     def get_3days_sales():
         """3日分の日別データ取得
@@ -87,43 +95,49 @@ class GetContext():
             list: 3日分の日別データ
         """
         
-        # 販売情報データ全取得
-        dateidx_df = GetContext._get_salese_info_df()
+        format_flg = 'dayly'
 
-        # 日別各果物集計
-        if dateidx_df.empty:
-            return None
-        else:
-            dately_df = dateidx_df.groupby('fruit_name').resample("D").sum()
-            dately_dict = dately_df.to_dict(orient='index')
-
-        # 日別の売上金額
-        dately_total_df = dateidx_df.resample("D").sum()
-        del_df = dately_total_df.drop(['fruit_name', 'sales'], axis=1)
-        monthly_total_dict = del_df.to_dict(orient='index')
-
-        # 各月日判定用データ
-        check_dately_list = GetContext._get_check_dately_list(dately_df)
-
-        # 日別売上総額
-        dately_total_list = GetContext._get_dately_total_list(check_dately_list, monthly_total_dict)
-
-        chenge_dict = dict(reversed(dately_dict.items()))
-
-        data0, data1, data2 = GetContext._divide_sales_info_3d(chenge_dict, check_dately_list)
-
-        data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
-
-        oneday, twoday, threeday = GetContext._create_row(check_dately_list, dately_total_list, data_str1, data_str2, data_str3)
-
-        threemonth_list = [
-            oneday, 
-            twoday, 
-            threeday
-        ]
+        try:
         
-        return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
-    
+            # 販売情報データ全取得
+            dateidx_df = GetContext._get_salese_info_df()
+
+            # 日別各果物集計
+            if dateidx_df.empty:
+                return None
+            else:
+                dately_df = dateidx_df.groupby('fruit_name').resample("D").sum()
+                dately_dict = dately_df.to_dict(orient='index')
+
+            # 日別の売上金額
+            dately_total_df = dateidx_df.resample("D").sum()
+            del_df = dately_total_df.drop(['fruit_name', 'sales'], axis=1)
+            monthly_total_dict = del_df.to_dict(orient='index')
+
+            # 各月日判定用データ
+            check_dately_list = GetContext._get_check_list(format_flg, dately_df)
+
+            # 日別売上総額
+            dately_total_list = GetContext._get_total_amount_list(format_flg, check_dately_list, monthly_total_dict)
+            # 各日別訳生成
+            data0, data1, data2 = GetContext._divide_sales_info(format_flg, dately_dict, check_dately_list)
+            # 各日別訳成形
+            data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
+
+            oneday, twoday, threeday = GetContext._create_row(check_dately_list, dately_total_list, data_str1, data_str2, data_str3)
+
+            threemonth_list = [
+                oneday, 
+                twoday, 
+                threeday
+            ]
+            
+            return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
+
+        except Exception as e:
+            print(e)
+            return None
+
     def _get_df_all_sales_info():
         """販売情報に登録されている全てのレコードを取得
 
@@ -154,82 +168,46 @@ class GetContext():
 
         return dateidx_df
     
-    def _get_check_monthly_list(monthly_df:pd.DataFrame):
+    def _get_check_list(format_flg:str, dately_df:pd.DataFrame):
+        """最新月日を取得
 
-        check_data = monthly_df.index.levels[1]
-        
-        check_monthly_list = []
-        for check_data in check_data:
-            target = check_data.strftime('%Y/%m')
-            check_monthly_list.append(target)
+        Args:
+            format_flg (str): 月別か日別
+            dately_df (pd.DataFrame): 月日別各果物集計
 
-        return check_monthly_list
-    
-    def _get_monthly_total_amount_list(check_monthly_list:list, monthly_total_dict:dict):
-
-        monthly_total_amount_list = []
-        for i in monthly_total_dict:
-            total = monthly_total_dict.get(i)
-            check_time = i.strftime('%Y/%m')
-            if check_time == check_monthly_list[-1]:
-                monthly_total_amount_list.append(total['total'])
-            if check_time == check_monthly_list[-2]:
-                monthly_total_amount_list.append(total['total'])
-            if check_time == check_monthly_list[-3]:
-                monthly_total_amount_list.append(total['total'])
-            else:
-                pass
-
-        return monthly_total_amount_list
-
-    def _divide_sales_info_3m(monthly_dict:dict, check_monthly_list:list):
-        
-        data0 = []
-        data1 = []
-        data2 = []
-        for i in monthly_dict:
-            data = monthly_dict.get(i)
-            time = i[1].strftime('%Y/%m')
-            if time == check_monthly_list[-1]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                text_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data0.append(text_data)
-            if time == check_monthly_list[-2]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                text1_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data1.append(text1_data)
-            if time == check_monthly_list[-3]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                text2_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data2.append(text2_data)
-            else:
-                pass
-
-        return data0, data1, data2
-    
-    def _get_check_dately_list(dately_df:pd.DataFrame):
+        Returns:
+            check_dately_list (list): 最新月日
+        """
 
         check_data = dately_df.index.levels[1]
+
+        format_time = GetContext._cmn_check_format_flg(format_flg)
         
         check_dately_list = []
         for check_data in check_data:
-            target = check_data.strftime('%Y/%m/%d')
+            target = check_data.strftime(format_time)
             check_dately_list.append(target)
 
-        return check_dately_list
+        return check_dately_list[-3:]
     
-    def _get_dately_total_list(check_dately_list:list, monthly_total_dict:dict):
+    def _get_total_amount_list(format_flg:str, check_dately_list:list, monthly_total_dict:dict):
+        """各月日の総額を取得
+
+        Args:
+            format_flg (str): 月別か日別
+            check_dately_list (list): 最新月日を取得
+            monthly_total_dict (dict): 最新月日の売上金額
+
+        Returns:
+            dately_total_list (list): 各月日の総額
+        """
+
+        format_time = GetContext._cmn_check_format_flg(format_flg)
 
         dately_total_list = []
         for i in monthly_total_dict:
             total = monthly_total_dict.get(i)
-            check_time = i.strftime('%Y/%m/%d')
+            check_time = i.strftime(format_time)
             if check_time == check_dately_list[-1]:
                 dately_total_list.append(total['total'])
             if check_time == check_dately_list[-2]:
@@ -241,22 +219,27 @@ class GetContext():
 
         return dately_total_list
     
-    def _divide_sales_info_3d(chenge_dict:dict, check_dately_list:list):
-        """3日分の内訳を各日にちに分割する
+    def _divide_sales_info(format_flg:str, chenge_dict:dict, check_dately_list:list):
+        """内訳を分割
 
         Args:
+            format_flg (str): _description_
             chenge_dict (dict): _description_
             check_dately_list (list): _description_
 
         Returns:
             _type_: _description_
         """
+
+        format_time = GetContext._cmn_check_format_flg(format_flg)
+
         data0 = []
         data1 = []
         data2 = []
+
         for i in chenge_dict:
             data = chenge_dict.get(i)
-            time = i[1].strftime('%Y/%m/%d')
+            time = i[1].strftime(format_time)
             if time == check_dately_list[-1]:
                 name = data['fruit_name']
                 total = str(data['total'])
@@ -289,13 +272,44 @@ class GetContext():
         
         return data0, data1, data2
     
-    def _create_row(check_list, dately_list, data_str1, data_str2, data_str3):
+    def _create_row(check_list:list, total_amounty_list:list, data_str1:str, data_str2:str, data_str3:str):
+        """各月or日の最新月日の売上と内訳行を作成
 
-        onerow = {'month': check_list[-1], 'all': dately_list[-1], 'detail': data_str1}
-        tworow = {'month': check_list[-2], 'all': dately_list[-2], 'detail': data_str2}
-        threerow = {'month': check_list[-3], 'all': dately_list[-3], 'detail': data_str3}
+        Args:
+            check_list (list): 最新月日のリスト
+            total_amounty_list (list): 最新月日の総額リスト
+            data_str1 (str): 内訳
+            data_str2 (str): 内訳
+            data_str3 (str): 内訳
+
+        Returns:
+            onerow (dict): 最新月日の売上と内訳
+            tworow (dict): 最新月日の売上と内訳
+            threerow (dict): 最新月日の売上と内訳
+        """
+
+        onerow:dict = {'month': check_list[-1], 'all': total_amounty_list[-1], 'detail': data_str1}
+        tworow:dict = {'month': check_list[-2], 'all': total_amounty_list[-2], 'detail': data_str2}
+        threerow:dict = {'month': check_list[-3], 'all': total_amounty_list[-3], 'detail': data_str3}
 
         return onerow, tworow, threerow
+    
+    def _cmn_check_format_flg(format_flg:str):
+        """月別か日別を判定
+
+        Args:
+            format_flg (str):月別(monthly) or 日別(dayly)
+
+        Returns:
+            format_time (str): 月別(%Y/%m) or 日別(%Y/%m/%d)
+        """
+
+        if format_flg == 'monthly':
+            format_time = '%Y/%m'
+        elif format_flg == 'dayly':
+            format_time = '%Y/%m/%d'
+
+        return format_time
 
     def _cmn_data_formatter(data0:list, data1:list, data2:list):
         """内訳詳細の不要な文字列を整形
