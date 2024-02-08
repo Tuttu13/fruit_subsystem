@@ -45,9 +45,13 @@ class GetContext():
         # 販売情報データ全取得
         dateidx_df = GetContext._get_salese_info_df()
 
-        # 月別各果物集計
-        monthly_df = dateidx_df.groupby('fruit_name').resample("M").sum()
-        monthly_dict = monthly_df.to_dict(orient='index')
+        # TODO 月別各果物集計
+        # 空のデータフレームだった場合、例外発生
+        if dateidx_df.empty:
+            return None
+        else:
+            monthly_df = dateidx_df.groupby('fruit_name').resample("M").sum()
+            monthly_dict = monthly_df.to_dict(orient='index')
 
         # 各月別の売上金額
         monthly_total_df = dateidx_df.resample("M").sum()
@@ -66,9 +70,7 @@ class GetContext():
         # 各月内訳成形
         data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
 
-        onemonth = {'month': check_monthly_list[-1], 'all': monthly_total_list[-1], 'detail': data_str1}
-        twomonth = {'month': check_monthly_list[-2], 'all': monthly_total_list[-2], 'detail': data_str2}
-        threemonth = {'month': check_monthly_list[-3], 'all': monthly_total_list[-3], 'detail': data_str3}
+        onemonth, twomonth, threemonth = GetContext._create_row(check_monthly_list, monthly_total_list, data_str1, data_str2, data_str3)
 
         threemonth_list = [
             onemonth,
@@ -89,8 +91,11 @@ class GetContext():
         dateidx_df = GetContext._get_salese_info_df()
 
         # 日別各果物集計
-        dately_df = dateidx_df.groupby('fruit_name').resample("D").sum()
-        dately_dict = dately_df.to_dict(orient='index')
+        if dateidx_df.empty:
+            return None
+        else:
+            dately_df = dateidx_df.groupby('fruit_name').resample("D").sum()
+            dately_dict = dately_df.to_dict(orient='index')
 
         # 日別の売上金額
         dately_total_df = dateidx_df.resample("D").sum()
@@ -109,9 +114,7 @@ class GetContext():
 
         data_str1, data_str2, data_str3 = GetContext._cmn_data_formatter(data0, data1, data2)
 
-        oneday = {'month': check_dately_list[-1], 'all': dately_total_list[-1], 'detail': data_str1}
-        twoday = {'month': check_dately_list[-2], 'all': dately_total_list[-2], 'detail': data_str2}
-        threeday = {'month': check_dately_list[-3], 'all': dately_total_list[-3], 'detail': data_str3}
+        oneday, twoday, threeday = GetContext._create_row(check_dately_list, dately_total_list, data_str1, data_str2, data_str3)
 
         threemonth_list = [
             oneday, 
@@ -221,7 +224,7 @@ class GetContext():
 
         return check_dately_list
     
-    def _get_dately_total_list(check_dately_list, monthly_total_dict):
+    def _get_dately_total_list(check_dately_list:list, monthly_total_dict:dict):
 
         dately_total_list = []
         for i in monthly_total_dict:
@@ -238,7 +241,16 @@ class GetContext():
 
         return dately_total_list
     
-    def _divide_sales_info_3d(chenge_dict, check_dately_list):
+    def _divide_sales_info_3d(chenge_dict:dict, check_dately_list:list):
+        """3日分の内訳を各日にちに分割する
+
+        Args:
+            chenge_dict (dict): _description_
+            check_dately_list (list): _description_
+
+        Returns:
+            _type_: _description_
+        """
         data0 = []
         data1 = []
         data2 = []
@@ -276,15 +288,23 @@ class GetContext():
                 pass
         
         return data0, data1, data2
+    
+    def _create_row(check_list, dately_list, data_str1, data_str2, data_str3):
+
+        onerow = {'month': check_list[-1], 'all': dately_list[-1], 'detail': data_str1}
+        tworow = {'month': check_list[-2], 'all': dately_list[-2], 'detail': data_str2}
+        threerow = {'month': check_list[-3], 'all': dately_list[-3], 'detail': data_str3}
+
+        return onerow, tworow, threerow
 
     def _cmn_data_formatter(data0:list, data1:list, data2:list):
         """内訳詳細の不要な文字列を整形
 
-            以下の4つの付与な文字列削除
-                [: 左角かっこ
-                ]: 右角かっこ
-                ': シングルクォート
-                ,: カンマ
+        
+            [: 左角かっこ
+            ]: 右角かっこ
+            ': シングルクォート
+            ,: カンマ
 
         Args:
             data0 (list): 1つ目のデータ
