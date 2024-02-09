@@ -4,6 +4,7 @@ from django.views.generic import ListView
 from django_pandas.io import read_frame
 import pandas as pd
 import re
+from collections import OrderedDict
 
 class SaleListView(LoginRequiredMixin,ListView):
     template_name = 'statistics.html'
@@ -76,11 +77,7 @@ class GetContext():
 
             onemonth, twomonth, threemonth = GetContext._create_row(check_monthly_list, monthly_total_list, data_str1, data_str2, data_str3)
 
-            threemonth_list = [
-                onemonth,
-                twomonth,
-                threemonth
-            ]
+            threemonth_list = GetContext._check_list(onemonth, twomonth, threemonth)
 
             return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
         
@@ -116,6 +113,7 @@ class GetContext():
 
             # 各月日判定用データ
             check_dately_list = GetContext._get_check_list(format_flg, dately_df)
+            
 
             # 日別売上総額
             dately_total_list = GetContext._get_total_amount_list(format_flg, check_dately_list, monthly_total_dict)
@@ -126,11 +124,7 @@ class GetContext():
 
             oneday, twoday, threeday = GetContext._create_row(check_dately_list, dately_total_list, data_str1, data_str2, data_str3)
 
-            threemonth_list = [
-                oneday, 
-                twoday, 
-                threeday
-            ]
+            threemonth_list = GetContext._check_list(oneday, twoday, threeday)
             
             return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
 
@@ -204,73 +198,86 @@ class GetContext():
 
         format_time = GetContext._cmn_check_format_flg(format_flg)
 
-        dately_total_list = []
-        for i in monthly_total_dict:
-            total = monthly_total_dict.get(i)
-            check_time = i.strftime(format_time)
-            if check_time == check_dately_list[-1]:
-                dately_total_list.append(total['total'])
-            if check_time == check_dately_list[-2]:
-                dately_total_list.append(total['total'])
-            if check_time == check_dately_list[-3]:
-                dately_total_list.append(total['total'])
-            else:
-                pass
+        try:
 
-        return dately_total_list
+            dately_total_list = []
+            for i in monthly_total_dict:
+                total = monthly_total_dict.get(i)
+                check_time = i.strftime(format_time)
+                if check_time == check_dately_list[-1]:
+                    dately_total_list.append(total['total']) 
+                    continue
+                if check_time == check_dately_list[-2]:
+                    dately_total_list.append(total['total'])
+                    continue
+                if check_time == check_dately_list[-3]:
+                    dately_total_list.append(total['total'])
+                    continue
+        finally:
+            return dately_total_list
     
     def _divide_sales_info(format_flg:str, chenge_dict:dict, check_dately_list:list):
         """内訳を分割
 
         Args:
-            format_flg (str): _description_
-            chenge_dict (dict): _description_
-            check_dately_list (list): _description_
+            format_flg (str): 月別か日別
+            chenge_dict (dict): 最新月日を取得
+            check_dately_list (list): 最新月日を取得
 
         Returns:
             _type_: _description_
         """
 
         format_time = GetContext._cmn_check_format_flg(format_flg)
+        try:
+            data0 = []
+            data1 = []
+            data2 = []
 
-        data0 = []
-        data1 = []
-        data2 = []
-
-        for i in chenge_dict:
-            data = chenge_dict.get(i)
-            time = i[1].strftime(format_time)
-            if time == check_dately_list[-1]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                if name == 0:
-                    text_data = ' 0円(0)'
+            for i in chenge_dict:
+                data = chenge_dict.get(i)
+                fruit_name = i[0]
+                time = i[1].strftime(format_time)
+                if time == check_dately_list[-1]:
+                    name = fruit_name
+                    total = str(data['total'])
+                    sales = str(data['sales'])
+                    if name == 0:
+                        text_data = ' 0円(0)'
+                    elif sales == '0':
+                        pass
+                    else:
+                        text_data = ' {0}:{1}円({2})'.format(name, total, sales)
+                    data0.append(text_data)
+                    continue
+                if time == check_dately_list[-2]:
+                    name = fruit_name
+                    total = str(data['total'])
+                    sales = str(data['sales'])
+                    if name == 0:
+                        text1_data = ' 0円(0)'
+                    elif sales == '0':
+                        continue
+                    else:
+                        text1_data = ' {0}:{1}円({2})'.format(name, total, sales)
+                    data1.append(text1_data)
+                    continue
+                if time == check_dately_list[-3]:
+                    name = fruit_name
+                    total = str(data['total'])
+                    sales = str(data['sales'])
+                    if name == 0:
+                        text2_data = ' 0円(0)'
+                    elif sales == '0':
+                        continue
+                    else:
+                        text2_data = ' {0}:{1}円({2})'.format(name, total, sales)
+                    data2.append(text2_data)
+                    continue
                 else:
-                    text_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data0.append(text_data)
-            if time == check_dately_list[-2]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                if name == 0:
-                    text1_data = ' 0円(0)'
-                else:
-                    text1_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data1.append(text1_data)
-            if time == check_dately_list[-3]:
-                name = data['fruit_name']
-                total = str(data['total'])
-                sales = str(data['sales'])
-                if name == 0:
-                    text2_data = ' 0円(0)'
-                else:
-                    text2_data = ' {0}:{1}円({2})'.format(name, total, sales)
-                data2.append(text2_data)
-            else:
-                pass
-        
-        return data0, data1, data2
+                    pass
+        finally:
+            return data0, data1, data2
     
     def _create_row(check_list:list, total_amounty_list:list, data_str1:str, data_str2:str, data_str3:str):
         """各月or日の最新月日の売上と内訳行を作成
@@ -287,12 +294,32 @@ class GetContext():
             tworow (dict): 最新月日の売上と内訳
             threerow (dict): 最新月日の売上と内訳
         """
+        onerow = {}
+        tworow = {}
+        threerow = {}
 
-        onerow:dict = {'month': check_list[-1], 'all': total_amounty_list[-1], 'detail': data_str1}
-        tworow:dict = {'month': check_list[-2], 'all': total_amounty_list[-2], 'detail': data_str2}
-        threerow:dict = {'month': check_list[-3], 'all': total_amounty_list[-3], 'detail': data_str3}
+        try:
+            if check_list[-1]:
+                onerow:dict = {'month': check_list[-1], 'all': total_amounty_list[-1], 'detail': data_str1}
+            if check_list[-2]:
+                tworow:dict = {'month': check_list[-2], 'all': total_amounty_list[-2], 'detail': data_str2}
+            if check_list[-3]:
+                threerow:dict = {'month': check_list[-3], 'all': total_amounty_list[-3], 'detail': data_str3}
+        finally:
+            return onerow, tworow, threerow
+    
 
-        return onerow, tworow, threerow
+    def _check_list(one, two, three):
+
+        threemonth_list = []
+        if one:
+            threemonth_list.append(one)
+        if two:
+            threemonth_list.append(two)
+        if three:
+            threemonth_list.append(three)
+
+        return threemonth_list
     
     def _cmn_check_format_flg(format_flg:str):
         """月別か日別を判定
