@@ -1,7 +1,9 @@
-from fruit_app.models import FruitsSalesInfo
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+
+from fruit_app.models import FruitsSalesInfo
 from statistics_info import statistics_module as statistics
+
 
 class SaleListView(LoginRequiredMixin,ListView):
     template_name = 'statistics.html'
