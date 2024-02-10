@@ -1,6 +1,8 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, ListView
 from django.views.generic.list import ListView
 
 from .forms import FruitForm
@@ -25,13 +27,24 @@ class FruitCreateView(CreateView):
     def get_success_url(self):
         return reverse("list")
 
-class FruitUpdateView(LoginRequiredMixin,UpdateView):
-    template_name = "fruit_master/fruit_edit.html"
-    model = FruitsMaster
-    form_class = FruitForm
+@login_required
+def editsale(request, pk):
 
-    def get_success_url(self):
-        return reverse("list")
+    template_name = 'fruit_master/fruit_edit.html'
+
+    if request.method == 'POST':
+        data = request.POST
+        target_fruit = data['fruit_name']
+        price = data['price']
+
+        FruitsMaster.objects.filter(pk=pk).update(
+            fruit_name=target_fruit,
+            price=price,
+        )
+        return redirect(reverse('list')) 
+    
+    return render(request, template_name)
+
 
 class FruitDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'fruit_master/fruits_list.html'
