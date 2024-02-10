@@ -1,1 +1,1 @@
-# fruit_subbsystem
+# 果物販売管理
