@@ -1,7 +1,10 @@
-from fruit_app.models import FruitsSalesInfo
-from django_pandas.io import read_frame
-import pandas as pd
 import re
+
+import pandas as pd
+from django_pandas.io import read_frame
+
+from fruit_app.models import FruitsSalesInfo
+
 
 def get_df_all_sales_info():
 

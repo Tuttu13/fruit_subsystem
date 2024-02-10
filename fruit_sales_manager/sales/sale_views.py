@@ -1,15 +1,17 @@
 
-from fruit_app.models import FruitsSalesInfo, FruitsMaster
 import csv
 import io
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView,DeleteView
-from django.views.generic.list import ListView
-from django.shortcuts import render
-from django.urls import reverse_lazy, reverse
-from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views.generic import DeleteView, ListView
+from django.views.generic.list import ListView
+
+from fruit_app.models import FruitsMaster, FruitsSalesInfo
+from fruit_sales_manager import cmn_validation as valid
+
 
 class SaleListView(LoginRequiredMixin,ListView):
     template_name = 'fruit_sale/sale_list.html'
@@ -82,12 +84,18 @@ def csvimport(request):
         reader = csv.reader(csv_file)
 
     for row in reader:
-        FruitsSalesInfo.objects.create(
-            fruit_name=row[0],
-            sales=row[1],
-            total=row[2],
-            sales_at=row[3]
-        )
+        try:
+            validtion= valid.Cmn_Validation
+            validtion.check_object_format(row)
+            FruitsSalesInfo.objects.create(
+                fruit_name=row[0],
+                sales=row[1],
+                total=row[2],
+                sales_at=row[3]
+            )
+        finally:
+            continue
+
     return redirect(reverse('sales')) 
 
 def _get_total(target_fruit, sales):
