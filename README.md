@@ -10,9 +10,9 @@
 ## 実行手順について
 以下に、実行手順について記載します。また1から順に実施してください  
 1. 以下のコマンドを実行し、マイグレーションファイル作成  
-```python manage.py makemigrations```
+```python manage.py makemigrations fruit_app```
 2. 以下のコマンドを実行し、マイグレーション実行  
-```python3 manage.py migrate fruit_app```
+```python3 manage.py migrate```
 3. 以下のコマンドを実行し、superuserの作成  
 ```python manage.py createsuperuser```  
 またメールアドレスは未登録でも問題ありません
