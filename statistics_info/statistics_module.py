@@ -17,7 +17,10 @@ def get_salese_info_df():
     target_cols = ['fruit_name', 'sales', 'total', 'sales_at']
     df_salesinfo = get_df_all_sales_info()
     target_df = df_salesinfo[target_cols]
-    dateidx_df = target_df.set_index(['sales_at'])
+    del_df = target_df.drop(['sales_at'], axis=1)
+    jp_df = target_df["sales_at"].dt.tz_convert('Asia/Tokyo')
+    jp_time_df = pd.concat([del_df, jp_df], axis=1)
+    dateidx_df = jp_time_df.set_index(['sales_at'])
 
     return dateidx_df
 
