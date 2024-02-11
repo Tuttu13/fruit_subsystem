@@ -30,7 +30,7 @@ class GetContext():
         format_type = 'monthly'
 
         try:
-            all_monthly_df = statistics.get_salese_info_df()
+            all_monthly_df = statistics.format_sales_info_df()
 
             if all_monthly_df.empty:
                 return None
@@ -65,7 +65,7 @@ class GetContext():
         format_type = 'dayly'
 
         try:
-            all_dately_df = statistics.get_salese_info_df()
+            all_dately_df = statistics.format_sales_info_df()
 
             if all_dately_df.empty:
                 return None

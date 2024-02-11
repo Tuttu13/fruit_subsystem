@@ -12,7 +12,7 @@ def get_df_all_sales_info():
         df_salesinfo = read_frame(salesinfo)
         return df_salesinfo
     
-def get_salese_info_df():
+def format_sales_info_df():
 
     target_cols = ['fruit_name', 'sales', 'total', 'sales_at']
     df_salesinfo = get_df_all_sales_info()
