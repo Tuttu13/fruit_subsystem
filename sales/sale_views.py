@@ -10,6 +10,7 @@ from django.views.generic import DeleteView, ListView
 from django.views.generic.list import ListView
 
 from fruit_app.models import FruitsMaster, FruitsSalesInfo
+from fruit_sales_manager import cmn_formatter as formatter
 from fruit_sales_manager import cmn_validation as valid
 
 
@@ -36,19 +37,26 @@ def createsale(request):
     context = {'fluits_list': fruits,}
 
     if request.method == 'POST':
-        data = request.POST
-        target_fruit = data['fruit_name']
-        sales = data['sales']
-        total = _get_total(target_fruit, sales)
-        sales_at = data['saledate']
+        try:
+            data = request.POST
 
-        FruitsSalesInfo.objects.create(
-            fruit_name=target_fruit,
-            sales=sales,
-            total=total,
-            sales_at=sales_at
-        )
-        return redirect(reverse('sales')) 
+            target_fruit = data['fruit_name']
+            validtion= valid.Cmn_Validation
+            validtion.check_fruit_name(target_fruit)
+
+            sales = data['sales']
+            total = _get_total(target_fruit, sales)
+
+            sales_at = data['saledate']
+
+            FruitsSalesInfo.objects.create(
+                fruit_name=target_fruit,
+                sales=sales,
+                total=total,
+                sales_at=sales_at
+            )
+        finally:
+            return redirect(reverse('sales')) 
     
     return render(request, template_name, context)
 
@@ -60,19 +68,26 @@ def editsale(request, pk):
     context = {'fluits_list': fruits,}
 
     if request.method == 'POST':
-        data = request.POST
-        target_fruit = data['fruit_name']
-        sales = data['sales']
-        total = _get_total(target_fruit, sales)
-        sales_at = data['saledate']
+        try:
+            data = request.POST
 
-        FruitsSalesInfo.objects.filter(pk=pk).update(
-            fruit_name=target_fruit,
-            sales=sales,
-            total=total,
-            sales_at=sales_at
-        )
-        return redirect(reverse('sales')) 
+            target_fruit = data['fruit_name']
+            validtion= valid.Cmn_Validation
+            validtion.check_fruit_name(target_fruit)
+
+            sales = data['sales']
+            total = _get_total(target_fruit, sales)
+
+            sales_at = data['saledate']
+
+            FruitsSalesInfo.objects.filter(pk=pk).update(
+                fruit_name=target_fruit,
+                sales=sales,
+                total=total,
+                sales_at=sales_at
+            )
+        finally:
+            return redirect(reverse('sales')) 
     
     return render(request, template_name, context)
 
@@ -87,8 +102,13 @@ def csvimport(request):
         try:
             validtion= valid.Cmn_Validation
             validtion.check_object_format(row)
+
+            target_fruit= row[0]
+            kana = formatter.Cmn_Fomatter
+            kata_fruit = kana.check_kata_format(target_fruit)
+
             FruitsSalesInfo.objects.create(
-                fruit_name=row[0],
+                fruit_name=kata_fruit,
                 sales=row[1],
                 total=row[2],
                 sales_at=row[3]
