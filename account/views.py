@@ -1,23 +1,7 @@
 #_app/views.py
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
-from django.db import IntegrityError
 from django.shortcuts import redirect, render
 
-TARGET_DIR = 'account/'
-
-def signupfunc(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-
-        try:
-            User.objects.create_user(username, '', password)
-            return render(request, 'account/login.html', {})
-        except IntegrityError:
-            return render(request, 'account/signup.html', {'error': 'このユーザはすでに登録されています'})
-
-    return render(request, TARGET_DIR+'signup.html', {})
 
 def loginfunc(request):
     if request.method == 'POST':
@@ -32,4 +16,4 @@ def loginfunc(request):
         else:
             return render(request, 'account/login.html', {'error': 'ユーザー名かパスワードが正しくありません'})
     
-    return render(request, TARGET_DIR+'login.html', {})
+    return render(request, 'account/login.html', {})
