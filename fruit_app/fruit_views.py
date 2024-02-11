@@ -15,7 +15,7 @@ class FruitListView(LoginRequiredMixin, ListView):
     
     def get_queryset(self, **kwargs):
         queryset = super().get_queryset(**kwargs) 
-        queryset = queryset.order_by('-created_at')
+        queryset = queryset.order_by('-updated_at')
 
         return queryset
 class FruitCreateView(CreateView):
