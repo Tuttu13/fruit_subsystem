@@ -21,7 +21,7 @@
 1. 以下のコマンドを実行し、マイグレーションファイルを作成  
 ```python manage.py makemigrations fruit_app```
 2. 以下のコマンドを実行し、マイグレーションを実行  
-```python3 manage.py migrate```
+```python manage.py migrate```
 3. 以下のコマンドを実行し、superuserを作成  
 ```python manage.py createsuperuser```  
 　※メールアドレスは未登録でも問題ありません
