@@ -13,7 +13,6 @@
 
 {% block content %}
 
-
 <body class="text-center">
     <div class="container">
         <form class="form-signin" method="POST">{% csrf_token %}
@@ -25,5 +24,10 @@
             <button class="w-100 btn btn-lg btn-primary" type="submit">ログイン</button>
         </form>
     </div>
+    {% if error %}
+    <div>
+        {{ error }}
+    </div>
+    {% endif %}
 </body>
 {% endblock content %}

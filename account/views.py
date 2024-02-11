@@ -1,8 +1,8 @@
 #_app/views.py
-from django.db import IntegrityError
-from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.db import IntegrityError
+from django.shortcuts import redirect, render
 
 TARGET_DIR = 'account/'
 
@@ -30,6 +30,6 @@ def loginfunc(request):
             return redirect('index')
         
         else:
-            return render(request, 'account/login.html', {})
+            return render(request, 'account/login.html', {'error': 'ユーザー名かパスワードが正しくありません'})
     
     return render(request, TARGET_DIR+'login.html', {})
