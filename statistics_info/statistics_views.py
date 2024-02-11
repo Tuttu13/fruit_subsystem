@@ -35,10 +35,10 @@ class GetContext():
             if all_monthly_df.empty:
                 return None
             else:
-                monthly_df = all_monthly_df.groupby('fruit_name').resample("M").sum()
+                monthly_df = all_monthly_df.groupby('fruit_name').resample("ME").sum()
                 monthly_dict = monthly_df.to_dict(orient='index')
 
-            monthly_total_df = all_monthly_df.resample("M").sum()
+            monthly_total_df = all_monthly_df.resample("ME").sum()
             del_df = monthly_total_df.drop(['fruit_name', 'sales'], axis=1)
             monthly_total_dict = del_df.to_dict(orient='index')
 
