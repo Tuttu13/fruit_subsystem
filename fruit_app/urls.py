@@ -3,7 +3,7 @@ from django.urls import path
 from . import fruit_views, views
 
 urlpatterns = [
-    # TOP
+    # トップ画面
     path('', views.IndexView.as_view(), name='index'),
     # 果物マスタ
     path('list', fruit_views.FruitListView.as_view(), name='list'),
