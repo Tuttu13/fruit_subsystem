@@ -93,28 +93,33 @@ def editsale(request, pk):
 
 @login_required
 def csvimport(request):
-    if request.method == 'POST':
-        csv_file = request.FILES['form-data']
-        csv_file = io.TextIOWrapper(csv_file, encoding='utf-8-sig')
-        reader = csv.reader(csv_file)
+    template_name = 'fruit_sale/sale_list.html'
+    try:
+        if request.method == 'POST':
+            
+                csv_file = request.FILES['form-data']
+                csv_file = io.TextIOWrapper(csv_file, encoding='utf-8-sig')
+                reader = csv.reader(csv_file)
 
-    for row in reader:
-        try:
-            validtion= valid.Cmn_Validation
-            validtion.check_object_format(row)
+        for row in reader:
+            try:
+                validtion= valid.Cmn_Validation
+                validtion.check_object_format(row)
 
-            target_fruit= row[0]
-            kana = formatter.Cmn_Fomatter
-            kata_fruit = kana.check_kata_format(target_fruit)
+                target_fruit= row[0]
+                kana = formatter.Cmn_Fomatter
+                kata_fruit = kana.check_kata_format(target_fruit)
 
-            FruitsSalesInfo.objects.create(
-                fruit_name=kata_fruit,
-                sales=row[1],
-                total=row[2],
-                sales_at=row[3]
-            )
-        finally:
-            continue
+                FruitsSalesInfo.objects.create(
+                    fruit_name=kata_fruit,
+                    sales=row[1],
+                    total=row[2],
+                    sales_at=row[3]
+                )
+            finally:
+                continue
+    except:
+        return render(request, template_name, {'error': '文字コードutf-8形式のcsvをアップロードしてください'})
 
     return redirect(reverse('sales')) 
 
