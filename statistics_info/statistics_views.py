@@ -77,7 +77,7 @@ class GetContext():
             del_df = dately_total_df.drop(['fruit_name', 'sales'], axis=1)
             dayly_total_dict = del_df.to_dict(orient='index')
 
-            latest_dayly_list = statistics.get_latest_date_list(format_type, dately_df)
+            latest_dayly_list = statistics.get_latest_date_list(format_type, del_df)
             
             dately_total_amount_list = statistics.get_total_amount_list(format_type, latest_dayly_list, dayly_total_dict)
 

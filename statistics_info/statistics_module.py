@@ -26,7 +26,11 @@ def format_sales_info_df():
 
 def get_latest_date_list(format_flg:str, dately_df:pd.DataFrame):
 
-    check_data = dately_df.index.levels[1]
+    if format_flg == 'monthly':
+        check_data = dately_df.index.levels[1]
+    else:
+        check_data = dately_df.index
+
     format_time = _check_format_flg(format_flg)
     
     latest_date_list = []
