@@ -42,15 +42,15 @@ class GetContext():
             del_df = monthly_total_df.drop(['fruit_name', 'sales'], axis=1)
             monthly_total_dict = del_df.to_dict(orient='index')
 
-            latest_monthly_list = statistics.get_check_list(format_type, monthly_df)
+            latest_monthly_list = statistics.get_latest_date_list(format_type, monthly_df)
 
             monthly_total_amount_list = statistics.get_total_amount_list(format_type, latest_monthly_list, monthly_total_dict)
 
-            first_detail, second_detail, third_detail = statistics.divide_sales_info(format_type, monthly_dict, latest_monthly_list)
+            first_bill, second_bill, third_bill = statistics.divide_bills(format_type, monthly_dict, latest_monthly_list)
 
-            data_str1, data_str2, data_str3 = statistics.cmn_data_formatter(first_detail, second_detail, third_detail)
+            bill_str1, bill_str2, bill_str3 = statistics.bills_str_formatter(first_bill, second_bill, third_bill)
 
-            first_row, second_row, third_row = statistics.create_row(latest_monthly_list, monthly_total_amount_list, data_str1, data_str2, data_str3)
+            first_row, second_row, third_row = statistics.create_three_rows(latest_monthly_list, monthly_total_amount_list, bill_str1, bill_str2, bill_str3)
 
             threemonth_list = statistics.check_list(first_row, second_row, third_row)
 
@@ -77,15 +77,15 @@ class GetContext():
             del_df = dately_total_df.drop(['fruit_name', 'sales'], axis=1)
             dayly_total_dict = del_df.to_dict(orient='index')
 
-            latest_dayly_list = statistics.get_check_list(format_type, dately_df)
+            latest_dayly_list = statistics.get_latest_date_list(format_type, dately_df)
             
             dately_total_amount_list = statistics.get_total_amount_list(format_type, latest_dayly_list, dayly_total_dict)
 
-            first_detail, second_detail, third_detail = statistics.divide_sales_info(format_type, dately_dict, latest_dayly_list)
+            first_bill, second_bill, third_bill = statistics.divide_bills(format_type, dately_dict, latest_dayly_list)
 
-            data_str1, data_str2, data_str3 = statistics.cmn_data_formatter(first_detail, second_detail, third_detail)
+            bill_str1, bill_str2, bill_str3 = statistics.bills_str_formatter(first_bill, second_bill, third_bill)
 
-            first_row, second_row, third_row = statistics.create_row(latest_dayly_list, dately_total_amount_list, data_str1, data_str2, data_str3)
+            first_row, second_row, third_row = statistics.create_three_rows(latest_dayly_list, dately_total_amount_list, bill_str1, bill_str2, bill_str3)
 
             threemonth_list = statistics.check_list(first_row, second_row, third_row)
             

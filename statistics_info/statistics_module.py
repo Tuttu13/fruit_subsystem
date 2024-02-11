@@ -24,45 +24,45 @@ def get_salese_info_df():
 
     return dateidx_df
 
-def get_check_list(format_flg:str, dately_df:pd.DataFrame):
+def get_latest_date_list(format_flg:str, dately_df:pd.DataFrame):
 
     check_data = dately_df.index.levels[1]
-    format_time = cmn_check_format_flg(format_flg)
+    format_time = _check_format_flg(format_flg)
     
-    check_dately_list = []
+    latest_date_list = []
     for check_data in check_data:
         target = check_data.strftime(format_time)
-        check_dately_list.append(target)
+        latest_date_list.append(target)
 
-    return check_dately_list[-3:]
+    return latest_date_list[-3:]
 
 def get_total_amount_list(format_flg:str, check_dately_list:list, monthly_total_dict:dict):
 
-    format_time = cmn_check_format_flg(format_flg)
+    format_time = _check_format_flg(format_flg)
 
     try:
-        dately_total_list = []
+        total_amount_list = []
 
         for i in monthly_total_dict:
             total = monthly_total_dict.get(i)
             check_time = i.strftime(format_time)
 
             if check_time in check_dately_list[-3:]:
-                dately_total_list.append(total['total'])
+                total_amount_list.append(total['total'])
 
     finally:
-        return dately_total_list
+        return total_amount_list
 
-def divide_sales_info(format_flg:str, chenge_dict:dict, check_dately_list:list):
+def divide_bills(format_flg:str, chenge_dict:dict, check_dately_list:list):
 
-    format_time = cmn_check_format_flg(format_flg)
+    format_time = _check_format_flg(format_flg)
     data0, data1, data2 = [], [], []
     for i in chenge_dict:
         data = chenge_dict[i]
         fruit_name = i[0]
         time = i[1].strftime(format_time)
 
-        text_data = format_text_data(fruit_name, str(data['total']), str(data['sales']))
+        text_data = _format_text_data(fruit_name, str(data['total']), str(data['sales']))
 
         if time == check_dately_list[-1]:
             if text_data:
@@ -75,37 +75,22 @@ def divide_sales_info(format_flg:str, chenge_dict:dict, check_dately_list:list):
                 data2.append(text_data)
 
     return data0, data1, data2
-    
-def format_text_data(fruit_name, total, sales):
-    if sales == '0':
-        pass
-    else:
-        return ' {0}:{1}円({2})'.format(fruit_name, total, sales)
 
-def create_row(check_list:list, total_amounty_list:list, data_str1:str, data_str2:str, data_str3:str):
-    onerow = None
-    tworow = None
-    threerow = None
+def create_three_rows(check_list:list, total_amounty_list:list, data_str1:str, data_str2:str, data_str3:str):
+    first_row = None
+    second_row = None
+    third_row = None
     try:
-        onerow = {} if not check_list[-1] else {'month': check_list[-1], 'all': total_amounty_list[-1], 'detail': data_str1}
-        tworow = {} if not check_list[-2] else {'month': check_list[-2], 'all': total_amounty_list[-2], 'detail': data_str2}
-        threerow = {} if not check_list[-3] else {'month': check_list[-3], 'all': total_amounty_list[-3], 'detail': data_str3}
+        first_row = {} if not check_list[-1] else {'month': check_list[-1], 'all': total_amounty_list[-1], 'detail': data_str1}
+        second_row = {} if not check_list[-2] else {'month': check_list[-2], 'all': total_amounty_list[-2], 'detail': data_str2}
+        third_row = {} if not check_list[-3] else {'month': check_list[-3], 'all': total_amounty_list[-3], 'detail': data_str3}
     finally:
-        return onerow, tworow, threerow
+        return first_row, second_row, third_row
 
 def check_list(one, two, three):
     return [value for value in (one, two, three) if value]
 
-def cmn_check_format_flg(format_flg:str):
-
-    if format_flg == 'monthly':
-        format_time = '%Y/%m'
-    elif format_flg == 'dayly':
-        format_time = '%Y/%m/%d'
-
-    return format_time
-
-def cmn_data_formatter(data0:list, data1:list, data2:list):
+def bills_str_formatter(data0:list, data1:list, data2:list):
 
     arg_list = [data0, data1, data2]
     format_list = []
@@ -114,3 +99,18 @@ def cmn_data_formatter(data0:list, data1:list, data2:list):
         format_list.append(data_str)
 
     return format_list[0], format_list[1], format_list[2]
+
+def _check_format_flg(format_flg:str):
+
+    if format_flg == 'monthly':
+        format_time = '%Y/%m'
+    elif format_flg == 'dayly':
+        format_time = '%Y/%m/%d'
+
+    return format_time
+
+def _format_text_data(fruit_name, total, sales):
+    if sales == '0':
+        pass
+    else:
+        return ' {0}:{1}円({2})'.format(fruit_name, total, sales)
