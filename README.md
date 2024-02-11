@@ -9,7 +9,9 @@
 - django-bootstrap5: 23.4  
   → bootstrapでデザインを整えるために導入しました。
 - django-pandas: 0.6.6  
-  → djangoでqueryset型のデータをデータフレームに変換するために導入しました。  
+  → djangoでqueryset型のデータをデータフレームに変換するために導入しました。
+- jaconv==0.3.4  
+  → カタカナとひらがなを変換するために導入しました。
 - numpy: 1.26.3
 - pandas: 2.2.0
 
