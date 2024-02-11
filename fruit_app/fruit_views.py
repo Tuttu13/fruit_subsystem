@@ -41,8 +41,10 @@ def createfruit(request):
                 fruit_name=kata_fruit,
                 price=price,
             )
-        finally:
             return redirect(reverse('list')) 
+        except:
+            return render(request, template_name, {'error': 'カタカナかひらがなで果物名を入力してください'})
+            
     return render(request, template_name)
 
 @login_required
@@ -66,8 +68,10 @@ def editsale(request, pk):
                 fruit_name=kata_fruit,
                 price=price,
             )
-        finally:
             return redirect(reverse('list')) 
+        except:
+            return render(request, template_name, {'error': 'カタカナかひらがなで果物名を入力してください'})
+
     return render(request, template_name)
 
 
