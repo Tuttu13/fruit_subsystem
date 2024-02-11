@@ -39,10 +39,10 @@
 - 販売統計情報のコンテクストのデータ(累計、月別、日別)を取得するクラスを作成し、  
   クラス内で関数を3つ作成し、データ(累計、月別、日別)の取得をしました。
 - 販売統計情報画面のデータ(累計、月別、日別)生成する関数をモジュール化しました。  
-  ```statistics_info\statistics_module.py```を作成しました。
+  ```statistics_info/statistics_module.py```を作成しました。
 - 販売統計情報画面の各月別、日別のデータをformat_typeで判断させて、データを生成しました。  
-  月別の場合、```'monthly'```  (statistics_info\statistics_views.py L30)  
-  日別の場合、```'dayly'```  (statistics_info\statistics_views.py L65)  
+  月別の場合、```'monthly'```  (statistics_info/statistics_views.py L30)  
+  日別の場合、```'dayly'```  (statistics_info/statistics_views.py L65)  
 - 今後、機能を追加することを考慮して、各ページをアプリ層に分割して作成しました。  
   またページ自体を削除する際のデグレード防止も考慮しました。
 - 各画面のデザインがぶれないように画面のデザインをbootstrapを用いて整え、画面に統一性を持たせました。  
