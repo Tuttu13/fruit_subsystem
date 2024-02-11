@@ -80,7 +80,7 @@ def editsale(request, pk):
 def csvimport(request):
     if request.method == 'POST':
         csv_file = request.FILES['form-data']
-        csv_file = io.TextIOWrapper(csv_file, encoding='utf-8')
+        csv_file = io.TextIOWrapper(csv_file, encoding='utf-8-sig')
         reader = csv.reader(csv_file)
 
     for row in reader:
