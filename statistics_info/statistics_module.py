@@ -91,8 +91,8 @@ def create_three_rows(check_list:list, total_amounty_list:list, data_str1:str, d
     finally:
         return first_row, second_row, third_row
 
-def check_list(one, two, three):
-    return [value for value in (one, two, three) if value]
+def check_list(first_row, second_row, third_row):
+    return [value for value in (first_row, second_row, third_row) if value]
 
 def bills_str_formatter(data0:list, data1:list, data2:list):
 

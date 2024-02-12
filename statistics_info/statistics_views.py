@@ -52,9 +52,9 @@ class GetContext():
 
             first_row, second_row, third_row = statistics.create_three_rows(latest_monthly_list, monthly_total_amount_list, bill_str1, bill_str2, bill_str3)
 
-            threemonth_list = statistics.check_list(first_row, second_row, third_row)
+            bills_list = statistics.check_list(first_row, second_row, third_row)
 
-            return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
+            return sorted(bills_list, key=lambda x: x['month'], reverse=True)
         
         except Exception as e:
             print(e)
@@ -87,9 +87,9 @@ class GetContext():
 
             first_row, second_row, third_row = statistics.create_three_rows(latest_dayly_list, dately_total_amount_list, bill_str1, bill_str2, bill_str3)
 
-            threemonth_list = statistics.check_list(first_row, second_row, third_row)
+            bills_list = statistics.check_list(first_row, second_row, third_row)
             
-            return sorted(threemonth_list, key=lambda x: x['month'], reverse=True)
+            return sorted(bills_list, key=lambda x: x['month'], reverse=True)
 
         except Exception as e:
             print(e)
