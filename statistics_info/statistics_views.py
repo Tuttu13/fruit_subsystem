@@ -1,8 +1,12 @@
+import datetime
+from zoneinfo import ZoneInfo
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 
 from fruit_app.models import FruitsSalesInfo
 from statistics_info import statistics_module as statistics
+from statistics_info import statistics_module_r2 as statisticsr2
 
 
 class SaleListView(LoginRequiredMixin,ListView):
@@ -12,6 +16,7 @@ class SaleListView(LoginRequiredMixin,ListView):
     def get_context_data(self):
         context = super().get_context_data()
 
+        context['3months_sales'] = GetContext.get_3months_sales_r2()
         context['total_profit'] = GetContext.get_total_profit()
         context['3months_sales'] = GetContext.get_3months_sales()
         context['3days_sales'] = GetContext.get_3days_sales()
@@ -94,3 +99,40 @@ class GetContext():
         except Exception as e:
             print(e)
             return None
+
+    def get_3months_sales_r2():
+
+        all_dately_list = statisticsr2.get_all_data_list()
+        
+        formatter_lists = []
+        for list in all_dately_list:
+            formatter_list = list[1:5]
+            formatter_lists.append(formatter_list)
+
+        # 累計
+        bill_lists = []
+        for list in all_dately_list:
+            formatter_list = list[3]
+            bill_lists.append(formatter_list)
+        print(sum(bill_lists))
+
+        db_cols = ['fruit_name', 'sales', 'total', 'sales_at']
+        formatter_dict_lists = []
+        for item in formatter_lists:
+            fruit_info = dict(zip(db_cols, item))
+            item_time = datetime.datetime.strptime(fruit_info['sales_at'], '%Y-%m-%d %H:%M:%S')
+            item_time + datetime.timedelta(hours=9)
+            # TODO 日本時間に修正して追加
+            print(item_time.astimezone(ZoneInfo("Asia/Tokyo")))
+            # dt_now_jst = datetime.datetime.item_time(datetime.timezone(datetime.timedelta(hours=9)))
+            formatter_dict_lists.append(fruit_info)
+
+        # for item in formatter_dict_lists:
+
+
+        #     print(formatter_dict_lists)
+        
+
+
+        
+
