@@ -1,5 +1,7 @@
 import datetime
-from zoneinfo import ZoneInfo
+import itertools
+from itertools import groupby
+from operator import itemgetter
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
@@ -101,36 +103,48 @@ class GetContext():
             return None
 
     def get_3months_sales_r2():
+        # 変数名注意
 
         all_dately_list = statisticsr2.get_all_data_list()
         
+        # クエリしたデータから抽出 関数化
         formatter_lists = []
-        for list in all_dately_list:
-            formatter_list = list[1:5]
+        for tlist in all_dately_list:
+            formatter_list = tlist[1:5]
             formatter_lists.append(formatter_list)
 
-        # 累計
+        # 累計金額抽出 関数化
         bill_lists = []
-        for list in all_dately_list:
-            formatter_list = list[3]
+        for tlist in all_dately_list:
+            formatter_list = tlist[3]
             bill_lists.append(formatter_list)
-        print(sum(bill_lists))
 
+        # データ成形 関数化
         db_cols = ['fruit_name', 'sales', 'total', 'sales_at']
         formatter_dict_lists = []
+
         for item in formatter_lists:
-            fruit_info = dict(zip(db_cols, item))
-            item_time = datetime.datetime.strptime(fruit_info['sales_at'], '%Y-%m-%d %H:%M:%S')
-            item_time + datetime.timedelta(hours=9)
-            # TODO 日本時間に修正して追加
-            print(item_time.astimezone(ZoneInfo("Asia/Tokyo")))
-            # dt_now_jst = datetime.datetime.item_time(datetime.timezone(datetime.timedelta(hours=9)))
-            formatter_dict_lists.append(fruit_info)
+            fruit_info_dixt = dict(zip(db_cols, item))
+            fruit_values_dixt = item
+            list(fruit_values_dixt)
+            jst_time  = datetime.datetime.strptime(fruit_info_dixt['sales_at'], '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=9)
+            jst_str_time = jst_time.strftime('%Y/%m')
+            fruit_info_dixt['sales_at'] = jst_str_time
+            formatter_dict_lists.append(fruit_info_dixt)
+            # jst_time.strftime('%Y/%m')
+            # print(item_time.astimezone(ZoneInfo("Asia/Tokyo")))
 
-        # for item in formatter_dict_lists:
+        # グルーピングしたい　groupby
+        formatter_list_lists = []
+        for data_d in formatter_dict_lists:
+            print(data_d.values())
+            formatter_list_lists.append(data_d.values())
+
+        for key, group in formatter_list_lists:
+            print(f'{key}: {list(group)}')
 
 
-        #     print(formatter_dict_lists)
+
         
 
 
