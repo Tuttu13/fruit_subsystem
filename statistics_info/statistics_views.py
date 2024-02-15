@@ -1,7 +1,5 @@
 import datetime
 import itertools
-from itertools import groupby
-from operator import itemgetter
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
@@ -104,44 +102,71 @@ class GetContext():
 
     def get_3months_sales_r2():
         # 変数名注意
-
         all_dately_list = statisticsr2.get_all_data_list()
         
-        # クエリしたデータから抽出 関数化
-        formatter_lists = []
-        for tlist in all_dately_list:
-            formatter_list = tlist[1:5]
-            formatter_lists.append(formatter_list)
+        # クエリしたデータから抽出
+        formatter_lists = [tlist[1:5] for tlist in all_dately_list]
 
-        # 累計金額抽出 関数化
-        bill_lists = []
-        for tlist in all_dately_list:
-            formatter_list = tlist[3]
-            bill_lists.append(formatter_list)
-
-        # データ成形 関数化
+        # 累計金額抽出
+        bill_lists = sum([tlist[3] for tlist in all_dately_list])
+        print(bill_lists)
+    
+        # dict化
         db_cols = ['fruit_name', 'sales', 'total', 'sales_at']
-        formatter_dict_lists = []
+        formatter_dict_lists = [dict(zip(db_cols, item)) for item in formatter_lists]
 
-        for item in formatter_lists:
-            fruit_info_dixt = dict(zip(db_cols, item))
-            fruit_values_dixt = item
-            list(fruit_values_dixt)
-            jst_time  = datetime.datetime.strptime(fruit_info_dixt['sales_at'], '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=9)
-            jst_str_time = jst_time.strftime('%Y/%m')
-            fruit_info_dixt['sales_at'] = jst_str_time
-            formatter_dict_lists.append(fruit_info_dixt)
+        for item in formatter_dict_lists:
+            jst_time = datetime.datetime.strptime(item['sales_at'], '%Y-%m-%d %H:%M:%S') + datetime.timedelta(hours=9)
+            item['sales_at'] = jst_time.strftime('%Y/%m')
+            # timezone
             # jst_time.strftime('%Y/%m')
             # print(item_time.astimezone(ZoneInfo("Asia/Tokyo")))
+        
+        values_lists = [list(item.values()) for item in formatter_dict_lists]
 
-        # グルーピングしたい　groupby
-        formatter_list_lists = []
-        for data_d in formatter_dict_lists:
-            print(data_d.values())
-            formatter_list_lists.append(data_d.values())
+        sort_list = sorted(values_lists, key=lambda x: x[3], reverse=True)
 
-        for key, group in formatter_list_lists:
-            print(f'{key}: {list(group)}')
+        # 3か月分のデータ分割
+        gruopby_list = []
+        key_list = []
+        for k, g in itertools.groupby(sort_list, lambda x: x[3]):
+            group_dict = {k: list(g)}
+            key_list.append(k)
+            gruopby_list.append(group_dict)
+            if 3 < len(gruopby_list):
+                break
+        
+        three__list = [
+                [item[:3] + item[4:] for item in sorted(list(data.values())[0], key=lambda x: x[0])] for data in gruopby_list
+            ]
+        print(three__list)
+        # 内訳作成
+        bills_list = []
+        for onemonth in three__list:
+            one_month_bill = []
+            for k, g in itertools.groupby(onemonth, lambda x: x[0]):
+                group_dict = {k: list(g)}
+                test_list = list(group_dict.values())
+                if 1 < len(test_list[0]):
+                    # 各サブリストの最大の長さを取得
+                    max_length = max(map(len, test_list[0]))
+
+                    # パディングしてリストの転置
+                    transposed_data = [list(map(lambda x: x[i] if i < len(x) else 0, test_list[0])) for i in range(max_length)]
+
+                    # 各行の合計を求める
+                    sums = [sum(sublist) for sublist in transposed_data[1:3]]
+                    
+                    print(sums)
+                    one_month_bill.append(sums)
+                else:
+                    print(test_list)
+                    one_month_bill.append(test_list)
+            bills_list.append(one_month_bill)
+
+        print(bills_list)
+
+
 
 
 
