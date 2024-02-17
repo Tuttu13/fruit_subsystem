@@ -50,9 +50,9 @@ class GetContext():
             # 月別集計金額と内訳取得
             total_sum_list, rows_list = statisticsr.generate_bill_info(bills_list)
 
-            format_rows_list = statisticsr.generate_bill_list(monthly_key_list, total_sum_list, rows_list)
+            bill_rows_list = statisticsr.generate_bill_list(monthly_key_list, total_sum_list, rows_list)
 
-            return format_rows_list
+            return bill_rows_list
         except:
             traceback.print_exc()
             return None
@@ -77,9 +77,9 @@ class GetContext():
             # 日別集計金額と内訳生成
             total_sum_list, rows_list = statisticsr.generate_bill_info(bills_list)
             # 
-            format_rows_list = statisticsr.generate_bill_list(dately_key_list, total_sum_list, rows_list)
+            bill_rows_list = statisticsr.generate_bill_list(dately_key_list, total_sum_list, rows_list)
 
-            return format_rows_list
+            return bill_rows_list
         except:
             traceback.print_exc()
             return None
