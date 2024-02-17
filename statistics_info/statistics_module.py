@@ -1,120 +1,150 @@
-import re
-
-import pandas as pd
-from django_pandas.io import read_frame
-
-from fruit_app.models import FruitsSalesInfo
+import itertools
+import sqlite3
+from datetime import datetime, timedelta
 
 
-def get_df_all_sales_info():
-
-        salesinfo = FruitsSalesInfo.objects.all()
-        df_salesinfo = read_frame(salesinfo)
-        return df_salesinfo
+def get_all_data():
     
-def format_sales_info_df():
+    select_all_data_query = "SELECT * FROM fruit_app_fruitssalesinfo" 
 
-    target_cols = ['fruit_name', 'sales', 'total', 'sales_at']
-    df_salesinfo = get_df_all_sales_info()
-    target_df = df_salesinfo[target_cols]
-    del_df = target_df.drop(['sales_at'], axis=1)
-    jp_df = target_df["sales_at"].dt.tz_convert('Asia/Tokyo')
-    jp_time_df = pd.concat([del_df, jp_df], axis=1)
-    dateidx_df = jp_time_df.set_index(['sales_at'])
+    conn = sqlite3.connect('db.sqlite3')
+    cursor = conn.cursor()
 
-    return dateidx_df
+    cursor.execute(select_all_data_query)
+    all_data = cursor.fetchall()
 
-def get_latest_date_list(format_flg:str, dately_df:pd.DataFrame):
+    all_data_list = [row for row in all_data]
 
-    if format_flg == 'monthly':
-        check_data = dately_df.index.levels[1]
+    conn.close()
+
+    return all_data_list
+
+def get_target_data(all_dately_list):
+
+    formatter_lists = [tlist[1:5] for tlist in all_dately_list]
+
+    db_cols = ['fruit_name', 'sales', 'total', 'sales_at']
+    formatter_dict_lists = [dict(zip(db_cols, item)) for item in formatter_lists]
+
+    return formatter_dict_lists
+
+def format_datetime(date_type, formatter_dict_lists):
+
+    date_format = _check_date_type(date_type)
+
+    time_zone = timedelta(hours=9)
+
+    for item in formatter_dict_lists:
+        jst_time = datetime.strptime(item['sales_at'], '%Y-%m-%d %H:%M:%S') + time_zone
+        item['sales_at'] = jst_time.strftime(date_format)
+
+def get_sort_value_list(formatter_dict_lists):
+    values_lists = [list(item.values()) for item in formatter_dict_lists]
+    sort_list = sorted(values_lists, key=lambda x: x[3], reverse=True)
+    return sort_list
+
+def get_latest_three_day_data(key_list, sort_list):
+    gruopby_list = [{key: list(group)} for key, group in itertools.groupby(sort_list, key=lambda x: x[3])][:3] 
+    result_dict = {list(item.keys())[0]: list(item.values())[0] for item in gruopby_list}
+
+    test_list = [result_dict.get(key, []) for key in key_list]
+
+    sorted_data = [sorted(sublist, key=lambda x: x[0]) for sublist in test_list]
+    return sorted_data
+
+def create_bill_list(three_list):
+
+    bills_list = []
+
+    for onemonth in three_list:
+
+        one_month_bill = []
+
+        for key, group  in itertools.groupby(onemonth, lambda x: x[0]):
+            group_dict = {key: list(group)}
+            test_list = list(group_dict.values())
+
+            if len(test_list[0]) > 1:
+                max_length = max(map(len, test_list[0]))
+
+                transposed_data = [list(map(lambda x: x[i] if i < len(x) else 0, test_list[0])) for i in range(max_length)]
+
+                fruit = transposed_data[0]
+                sums = [sum(sublist) for sublist in transposed_data[1:3]]
+                sums.insert(0, fruit[0])
+                one_month_bill.append(tuple(sums))
+            else:
+                fruit_info = tuple(test_list[0][0])
+                one_month_bill.append(fruit_info)
+
+        bills_list.append(one_month_bill)
+
+    return bills_list
+
+def create_bill_info(bills_list):
+
+    rows_list = []
+    total_sum_list = []
+
+    for any_items in bills_list:
+
+        bill_list = []
+        bill_sum_list = []
+
+        for item in any_items:
+            bill_str = _create_bill_str(item)
+            bill_list.append(bill_str)
+            bill_sum_list.append(item[2])
+
+        b = ' '.join(bill_list)
+        bill_sum = sum(bill_sum_list)
+        total_sum_list.append(bill_sum)
+        rows_list.append(b)
+
+    return total_sum_list, rows_list
+
+def format_bill_info(three_date_list, total_sum_list, rows_list):
+
+    format_rows_list = [
+            {'month': data, 'all': tsum, 'detail': bill}
+            for data, tsum, bill in zip(three_date_list, total_sum_list, rows_list)
+        ]
+    return format_rows_list
+
+def _check_date_type(date_type):
+
+    if date_type == "daily":
+        date_format = '%Y/%m/%d'
     else:
-        check_data = dately_df.index
+        date_format = '%Y/%m'
 
-    format_time = _check_format_flg(format_flg)
-    
-    latest_date_list = []
-    for check_data in check_data:
-        target = check_data.strftime(format_time)
-        latest_date_list.append(target)
+    return date_format
 
-    return latest_date_list[-3:]
+def _create_bill_str(item):
 
-def get_total_amount_list(format_flg:str, check_dately_list:list, monthly_total_dict:dict):
+    bill_str = "{fruit}:{price}円({quantity}) ".format(
+                fruit=item[0], quantity=item[1], price=item[2])
 
-    format_time = _check_format_flg(format_flg)
+    return bill_str
 
-    try:
-        total_amount_list = []
+def create_dately_key_list():
+    current_datetime = datetime.now()
+    three_days_ago = current_datetime - timedelta(days=3)
 
-        for i in monthly_total_dict:
-            total = monthly_total_dict.get(i)
-            check_time = i.strftime(format_time)
+    dately_key_list = [
+        (three_days_ago + timedelta(days=i)).strftime('%Y/%m/%d')
+        for i in range(1, 4)
+    ]
+    dately_key_list.sort(reverse=True)
 
-            if check_time in check_dately_list[-3:]:
-                total_amount_list.append(total['total'])
+    return dately_key_list
 
-    finally:
-        return total_amount_list
+def create_monthly_key_list():
+    current_datetime = datetime.now()
 
-def divide_bills(format_flg:str, chenge_dict:dict, check_dately_list:list):
+    monthly_key_list = [
+        (current_datetime - timedelta(days=i * 30)).replace(day=1).strftime('%Y/%m')
+        for i in range(3)
+    ]
 
-    format_time = _check_format_flg(format_flg)
-    data0, data1, data2 = [], [], []
-    for i in chenge_dict:
-        data = chenge_dict[i]
-        fruit_name = i[0]
-        time = i[1].strftime(format_time)
-
-        text_data = _format_text_data(fruit_name, str(data['total']), str(data['sales']))
-
-        if time == check_dately_list[-1]:
-            if text_data:
-                data0.append(text_data)
-        elif time == check_dately_list[-2]:
-            if text_data:
-                data1.append(text_data)
-        elif time == check_dately_list[-3]:
-            if text_data:
-                data2.append(text_data)
-
-    return data0, data1, data2
-
-def create_three_rows(check_list:list, total_amounty_list:list, data_str1:str, data_str2:str, data_str3:str):
-    first_row = None
-    second_row = None
-    third_row = None
-    try:
-        first_row = {} if not check_list[-1] else {'month': check_list[-1], 'all': total_amounty_list[-1], 'detail': data_str1}
-        second_row = {} if not check_list[-2] else {'month': check_list[-2], 'all': total_amounty_list[-2], 'detail': data_str2}
-        third_row = {} if not check_list[-3] else {'month': check_list[-3], 'all': total_amounty_list[-3], 'detail': data_str3}
-    finally:
-        return first_row, second_row, third_row
-
-def check_list(first_row, second_row, third_row):
-    return [value for value in (first_row, second_row, third_row) if value]
-
-def bills_str_formatter(data0:list, data1:list, data2:list):
-
-    arg_list = [data0, data1, data2]
-    format_list = []
-    for target in arg_list:
-        data_str = re.sub(r"[\[\]',]", '', str(target))
-        format_list.append(data_str)
-
-    return format_list[0], format_list[1], format_list[2]
-
-def _check_format_flg(format_flg:str):
-
-    if format_flg == 'monthly':
-        format_time = '%Y/%m'
-    elif format_flg == 'dayly':
-        format_time = '%Y/%m/%d'
-
-    return format_time
-
-def _format_text_data(fruit_name, total, sales):
-    if sales == '0':
-        pass
-    else:
-        return ' {0}:{1}円({2})'.format(fruit_name, total, sales)
+    return monthly_key_list
