@@ -56,17 +56,15 @@ def get_dict_lists(all_data_list):
 
     return dict_lists
 
-def format_datetime(date_type, formatter_dict_lists):
-
+def converter_datetime(date_type, formatter_dict_lists):
     date_format = _check_date_type(date_type)
 
     time_zone = timedelta(hours=9)
-
     for item in formatter_dict_lists:
         jst_time = datetime.strptime(item['sales_at'], '%Y-%m-%d %H:%M:%S') + time_zone
         item['sales_at'] = jst_time.strftime(date_format)
 
-def get_sort_value_list(formatter_dict_lists):
+def get_sort_lists(formatter_dict_lists):
     values_lists = [list(item.values()) for item in formatter_dict_lists]
     sort_list = sorted(values_lists, key=lambda x: x[3], reverse=True)
     return sort_list
@@ -112,7 +110,7 @@ def create_bill_list(three_list):
 
     return bills_list
 
-def create_bill_info(bills_list):
+def generate_bill_info(bills_list):
     rows_list = []
     total_sum_list = []
 
@@ -128,8 +126,7 @@ def create_bill_info(bills_list):
 
     return total_sum_list, rows_list
 
-def format_bill_list(three_date_list, total_sum_list, rows_list):
-
+def generate_bill_list(three_date_list, total_sum_list, rows_list):
     format_rows_list = [
             {'month': data, 'all': tsum, 'detail': bill}
             for data, tsum, bill in zip(three_date_list, total_sum_list, rows_list)
@@ -146,7 +143,6 @@ def _check_date_type(date_type):
         date_format = '%Y/%m/%d'
     else:
         date_format = '%Y/%m'
-
     return date_format
 
 def _create_bill_str(item):
