@@ -66,7 +66,7 @@ class GetContext():
         # 時間種別
         date_type = "daily"
         # 当日から3日間取得
-        dately_key_list = statisticsr.create_dately_key_list()
+        daily_key_list = statisticsr.create_daily_key_list()
 
         try:
             # データ取得
@@ -77,13 +77,13 @@ class GetContext():
             # ソートしたデータのみ取得
             sort_fruits_list = statisticsr.get_sort_list(fruits_list)
             # 日付とフルーツ情報を取得
-            latest_three_list = statisticsr.get_latest_fruits_list(dately_key_list, sort_fruits_list)
+            latest_three_list = statisticsr.get_latest_fruits_list(daily_key_list, sort_fruits_list)
             # 各日別の内訳成形
             bills_list = statisticsr.format_bill_list(latest_three_list)
             # 各日別の集計金額と内訳生成
             total_sum_list, row_list = statisticsr.generate_billinfo_list(bills_list)
             # 各日、売り上げ、内訳を結合
-            bill_row_list = statisticsr.generate_bill_list(dately_key_list, total_sum_list, row_list)
+            bill_row_list = statisticsr.generate_bill_list(daily_key_list, total_sum_list, row_list)
 
             return bill_row_list
     

@@ -26,21 +26,21 @@ def get_all_data():
 
 def calc_total_amount():
 
-    all_dately_list = get_all_data()
-    total_amount = sum([target_list[3] for target_list in all_dately_list])
+    all_daily_list = get_all_data()
+    total_amount = sum([target_list[3] for target_list in all_daily_list])
 
     return total_amount
 
-def create_dately_key_list():
+def create_daily_key_list():
     
     three_days_ago = current_datetime - timedelta(days=3)
 
-    dately_key_list = [
+    daily_key_list = [
         (three_days_ago + timedelta(days=i)).strftime('%Y/%m/%d')
         for i in range(1, 4)]
-    dately_key_list.sort(reverse=True)
+    daily_key_list.sort(reverse=True)
 
-    return dately_key_list
+    return daily_key_list
 
 def create_monthly_key_list():
 
