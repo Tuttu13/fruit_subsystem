@@ -109,12 +109,13 @@ def csvimport(request):
                 target_fruit= row[0]
                 kana = formatter.Cmn_Fomatter
                 kata_fruit = kana.check_kata_format(target_fruit)
+                tz_time = row[3] + " +09:00"
 
                 FruitsSalesInfo.objects.create(
                     fruit_name=kata_fruit,
                     sales=row[1],
                     total=row[2],
-                    sales_at=row[3]
+                    sales_at=tz_time
                 )
             finally:
                 continue
