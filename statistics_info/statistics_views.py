@@ -1,8 +1,11 @@
+
+import traceback
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 
 from fruit_app.models import FruitsSalesInfo
-from statistics_info import statistics_module as statistics
+from statistics_info import statistics_module as statisticsr
 
 
 class SaleListView(LoginRequiredMixin,ListView):
@@ -11,8 +14,7 @@ class SaleListView(LoginRequiredMixin,ListView):
 
     def get_context_data(self):
         context = super().get_context_data()
-
-        context['total_profit'] = GetContext.get_total_profit()
+        context['total_profit'] = GetContext.get_total_amount()
         context['3months_sales'] = GetContext.get_3months_sales()
         context['3days_sales'] = GetContext.get_3days_sales()
 
@@ -20,77 +22,71 @@ class SaleListView(LoginRequiredMixin,ListView):
 
 class GetContext():
 
-    def get_total_profit():
-        df_salesinfo = statistics.get_df_all_sales_info()
-        total_profit = df_salesinfo.total.sum(axis=0)
-        return total_profit
+    def get_total_amount():
+
+        try:
+            total_amount = statisticsr.calc_total_amount()
+            return total_amount
+        except:
+            traceback.print_exc()
+            return None
     
     def get_3months_sales():
 
-        format_type = 'monthly'
+        # 時間種別
+        date_type = "monthly"
+        # 当月から3ヶ月取得
+        monthly_key_list = statisticsr.create_monthly_key_list()
 
         try:
-            all_monthly_df = statistics.format_sales_info_df()
+            # データ取得
+            all_data_list = statisticsr.get_all_data()
+            # データ成形
+            fruits_list = statisticsr.format_fruits_list(all_data_list)
+            statisticsr.converter_datetime(date_type, fruits_list)
+            # ソートしたデータのみ取得
+            sort_list = statisticsr.get_sort_list(fruits_list)
+            # 月付とフルーツ情報を取得
+            latest_three_list = statisticsr.get_latest_fruits_list(monthly_key_list, sort_list)
+            # 各月別の内訳作成
+            bills_list = statisticsr.format_bill_list(latest_three_list)
+            # 各月別の集計金額と内訳取得
+            total_sum_list, row_list = statisticsr.generate_billinfo_list(bills_list)
+            # 各月、売り上げ、内訳を結合
+            bill_row_list = statisticsr.generate_bill_list(monthly_key_list, total_sum_list, row_list)
 
-            if all_monthly_df.empty:
-                return None
-            else:
-                monthly_df = all_monthly_df.groupby('fruit_name').resample("ME").sum()
-                monthly_dict = monthly_df.to_dict(orient='index')
-
-            monthly_total_df = all_monthly_df.resample("ME").sum()
-            del_df = monthly_total_df.drop(['fruit_name', 'sales'], axis=1)
-            monthly_total_dict = del_df.to_dict(orient='index')
-
-            latest_monthly_list = statistics.get_latest_date_list(format_type, monthly_df)
-
-            monthly_total_amount_list = statistics.get_total_amount_list(format_type, latest_monthly_list, monthly_total_dict)
-
-            first_bill, second_bill, third_bill = statistics.divide_bills(format_type, monthly_dict, latest_monthly_list)
-
-            bill_str1, bill_str2, bill_str3 = statistics.bills_str_formatter(first_bill, second_bill, third_bill)
-
-            first_row, second_row, third_row = statistics.create_three_rows(latest_monthly_list, monthly_total_amount_list, bill_str1, bill_str2, bill_str3)
-
-            bills_list = statistics.check_list(first_row, second_row, third_row)
-
-            return sorted(bills_list, key=lambda x: x['month'], reverse=True)
-        
-        except Exception as e:
-            print(e)
-            return None
+            return bill_row_list
     
+        except:
+            traceback.print_exc()
+            return None
+
     def get_3days_sales():
-        
-        format_type = 'dayly'
+
+        # 時間種別
+        date_type = "daily"
+        # 当日から3日間取得
+        dately_key_list = statisticsr.create_dately_key_list()
 
         try:
-            all_dately_df = statistics.format_sales_info_df()
+            # データ取得
+            all_data_list = statisticsr.get_all_data()
+            # データ成形
+            fruits_list = statisticsr.format_fruits_list(all_data_list)
+            statisticsr.converter_datetime(date_type, fruits_list)
+            # ソートしたデータのみ取得
+            sort_list = statisticsr.get_sort_list(fruits_list)
+            # 日付とフルーツ情報を取得
+            latest_three_list = statisticsr.get_latest_fruits_list(dately_key_list, sort_list)
+            # 各日別の内訳成形
+            bills_list = statisticsr.format_bill_list(latest_three_list)
+            # 各日別の集計金額と内訳生成
+            total_sum_list, row_list = statisticsr.generate_billinfo_list(bills_list)
+            # 各日、売り上げ、内訳を結合
+            bill_row_list = statisticsr.generate_bill_list(dately_key_list, total_sum_list, row_list)
 
-            if all_dately_df.empty:
-                return None
-            else:
-                dately_df = all_dately_df.groupby('fruit_name').resample("D").sum()
-                dately_dict = dately_df.to_dict(orient='index')
-
-            dately_total_df = all_dately_df.resample("D").sum()
-            del_df = dately_total_df.drop(['fruit_name', 'sales'], axis=1)
-            dayly_total_dict = del_df.to_dict(orient='index')
-
-            latest_dayly_list = statistics.get_latest_date_list(format_type, del_df)
-            
-            dately_total_amount_list = statistics.get_total_amount_list(format_type, latest_dayly_list, dayly_total_dict)
-
-            first_bill, second_bill, third_bill = statistics.divide_bills(format_type, dately_dict, latest_dayly_list)
-
-            bill_str1, bill_str2, bill_str3 = statistics.bills_str_formatter(first_bill, second_bill, third_bill)
-
-            first_row, second_row, third_row = statistics.create_three_rows(latest_dayly_list, dately_total_amount_list, bill_str1, bill_str2, bill_str3)
-
-            bills_list = statistics.check_list(first_row, second_row, third_row)
-            
-            return sorted(bills_list, key=lambda x: x['month'], reverse=True)
-
-        except Exception as e:
-            print(e)
+            return bill_row_list
+    
+        except:
+            traceback.print_exc()
             return None
