@@ -33,53 +33,60 @@ class GetContext():
     
     def get_3months_sales():
 
+        # 時間種別
         date_type = "monthly"
         # 当月から3ヶ月取得
         monthly_key_list = statisticsr.create_monthly_key_list()
+
         try:
+            # データ取得
             all_data_list = statisticsr.get_all_data()
             # データ成形
-            formatter_dict_lists = statisticsr.get_dict_lists(all_data_list)
-            statisticsr.converter_datetime(date_type, formatter_dict_lists)
+            fruits_list = statisticsr.format_fruits_list(all_data_list)
+            statisticsr.converter_datetime(date_type, fruits_list)
             # ソートしたデータのみ取得
-            sort_list = statisticsr.get_sort_lists(formatter_dict_lists)
-            # 日付とフルーツ情報を取得
-            three_list = statisticsr.get_latest_three_day_data(monthly_key_list, sort_list)
-            # 内訳作成
-            bills_list = statisticsr.create_bill_list(three_list)
-            # 月別集計金額と内訳取得
-            total_sum_list, rows_list = statisticsr.generate_bill_info(bills_list)
+            sort_list = statisticsr.get_sort_list(fruits_list)
+            # 月付とフルーツ情報を取得
+            latest_three_list = statisticsr.get_latest_fruits_list(monthly_key_list, sort_list)
+            # 各月別の内訳作成
+            bills_list = statisticsr.format_bill_list(latest_three_list)
+            # 各月別の集計金額と内訳取得
+            total_sum_list, row_list = statisticsr.generate_billinfo_list(bills_list)
+            # 各月、売り上げ、内訳を結合
+            bill_row_list = statisticsr.generate_bill_list(monthly_key_list, total_sum_list, row_list)
 
-            bill_rows_list = statisticsr.generate_bill_list(monthly_key_list, total_sum_list, rows_list)
-
-            return bill_rows_list
+            return bill_row_list
+    
         except:
             traceback.print_exc()
             return None
 
     def get_3days_sales():
 
+        # 時間種別
         date_type = "daily"
         # 当日から3日間取得
         dately_key_list = statisticsr.create_dately_key_list()
-        try:
-            # 変数名注意
-            all_dately_list = statisticsr.get_all_data()
-            # データ成形
-            formatter_dict_lists = statisticsr.get_dict_lists(all_dately_list)
-            statisticsr.converter_datetime(date_type, formatter_dict_lists)
-            # ソートしたデータのみ取得
-            sort_list = statisticsr.get_sort_lists(formatter_dict_lists)
-            # 日付とフルーツ情報を取得
-            three_list = statisticsr.get_latest_three_day_data(dately_key_list, sort_list)
-            # 内訳作成
-            bills_list = statisticsr.create_bill_list(three_list)
-            # 日別集計金額と内訳生成
-            total_sum_list, rows_list = statisticsr.generate_bill_info(bills_list)
-            # 
-            bill_rows_list = statisticsr.generate_bill_list(dately_key_list, total_sum_list, rows_list)
 
-            return bill_rows_list
+        try:
+            # データ取得
+            all_data_list = statisticsr.get_all_data()
+            # データ成形
+            fruits_list = statisticsr.format_fruits_list(all_data_list)
+            statisticsr.converter_datetime(date_type, fruits_list)
+            # ソートしたデータのみ取得
+            sort_list = statisticsr.get_sort_list(fruits_list)
+            # 日付とフルーツ情報を取得
+            latest_three_list = statisticsr.get_latest_fruits_list(dately_key_list, sort_list)
+            # 各日別の内訳成形
+            bills_list = statisticsr.format_bill_list(latest_three_list)
+            # 各日別の集計金額と内訳生成
+            total_sum_list, row_list = statisticsr.generate_billinfo_list(bills_list)
+            # 各日、売り上げ、内訳を結合
+            bill_row_list = statisticsr.generate_bill_list(dately_key_list, total_sum_list, row_list)
+
+            return bill_row_list
+    
         except:
             traceback.print_exc()
             return None

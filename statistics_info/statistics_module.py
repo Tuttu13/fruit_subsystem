@@ -19,13 +19,16 @@ def get_all_data():
         all_data_list = [row for row in all_data]
 
         conn.close()
+
         return all_data_list
     except:
         traceback.print_exc()
 
 def calc_total_amount():
+
     all_dately_list = get_all_data()
-    total_amount = sum([tlist[3] for tlist in all_dately_list])
+    total_amount = sum([target_list[3] for target_list in all_dately_list])
+
     return total_amount
 
 def create_dately_key_list():
@@ -47,29 +50,30 @@ def create_monthly_key_list():
 
     return monthly_key_list
 
-def get_dict_lists(all_data_list):
+def format_fruits_list(all_data_list):
 
-    trimming_lists = _trimming_lists(all_data_list)
+    trimming_list = _trimming_list(all_data_list)
 
     db_cols = ['fruit_name', 'sales', 'total', 'sales_at']
-    dict_lists = [dict(zip(db_cols, value)) for value in trimming_lists]
+    dict_list = [dict(zip(db_cols, value)) for value in trimming_list]
 
-    return dict_lists
+    return dict_list
 
-def converter_datetime(date_type, formatter_dict_lists):
+def converter_datetime(date_type, formatter_dict_list):
     date_format = _check_date_type(date_type)
 
     time_zone = timedelta(hours=9)
-    for item in formatter_dict_lists:
+    for item in formatter_dict_list:
         jst_time = datetime.strptime(item['sales_at'], '%Y-%m-%d %H:%M:%S') + time_zone
         item['sales_at'] = jst_time.strftime(date_format)
 
-def get_sort_lists(formatter_dict_lists):
-    values_lists = [list(item.values()) for item in formatter_dict_lists]
-    sort_list = sorted(values_lists, key=lambda x: x[3], reverse=True)
+def get_sort_list(formatter_dict_list):
+    values_list = [list(item.values()) for item in formatter_dict_list]
+    sort_list = sorted(values_list, key=lambda x: x[3], reverse=True)
+
     return sort_list
 
-def get_latest_three_day_data(key_list, sort_list):
+def get_latest_fruits_list(key_list, sort_list):
 
     gruopby_list = [{key: list(group)} for key, group in itertools.groupby(
                     sort_list, key=lambda x: x[3])][:3]
@@ -79,9 +83,10 @@ def get_latest_three_day_data(key_list, sort_list):
     test_list = [result_dict.get(key, []) for key in key_list]
 
     sorted_data = [sorted(sublist, key=lambda x: x[0]) for sublist in test_list]
+
     return sorted_data
 
-def create_bill_list(three_list):
+def format_bill_list(three_list):
 
     bills_list = []
 
@@ -110,7 +115,7 @@ def create_bill_list(three_list):
 
     return bills_list
 
-def generate_bill_info(bills_list):
+def generate_billinfo_list(bills_list):
     rows_list = []
     total_sum_list = []
 
@@ -131,11 +136,13 @@ def generate_bill_list(three_date_list, total_sum_list, rows_list):
             {'month': data, 'all': tsum, 'detail': bill}
             for data, tsum, bill in zip(three_date_list, total_sum_list, rows_list)
         ]
+    
     return format_rows_list
 
-def _trimming_lists(all_data_list):
-    trimming_lists = [tlist[1:5] for tlist in all_data_list]
-    return trimming_lists
+def _trimming_list(all_data_list):
+    trimming_list = [target_list[1:5] for target_list in all_data_list]
+
+    return trimming_list
 
 def _check_date_type(date_type):
 
