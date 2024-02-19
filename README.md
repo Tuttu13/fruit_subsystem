@@ -41,7 +41,7 @@
   日別の場合、```"daily"```  (statistics_info/statistics_views.py L67)  
 - 当月、当日を判断するためにkeyリストを作成し、dict型データからget関数を用いてkeyに該当するvalueを取得する処理にしました。  
   月別の場合、create_monthly_key_list関数 (statistics_info\statistics_views.py L39)  
-  日別の場合、create_daily_key_list関数 (statistics_info\statistics_views.py L69)
+  日別の場合、create_daily_key_list関数 (statistics_info\statistics_views.py L69)  
   上記で作成したkeyを基にget_latest_fruits_list関数で処理を行いました。 
 - 今後、新しくページ・機能を追加することに考慮して、各ページごとにアプリを作成し分割しました。  
   またページ自体を削除する際にデグレード防止も考慮しました。
