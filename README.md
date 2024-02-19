@@ -59,5 +59,7 @@ fruit_subsystem
 ├── sales(販売情報管理機能)
 ├── statistics_info(販売統計情報機能)
 ├── templates(各画面html)
-└── README.md
+├── manage.py
+├── README.md
+└── requirements.txt
 </pre>
