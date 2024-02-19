@@ -59,16 +59,18 @@ def format_fruits_list(all_data_list):
 
     return dict_list
 
-def converter_datetime(date_type, formatter_dict_list):
+def converter_datetime(date_type, formatter_list):
+
     date_format = _check_date_type(date_type)
 
     time_zone = timedelta(hours=9)
-    for item in formatter_dict_list:
+    for item in formatter_list:
         jst_time = datetime.strptime(item['sales_at'], '%Y-%m-%d %H:%M:%S') + time_zone
         item['sales_at'] = jst_time.strftime(date_format)
 
-def get_sort_list(formatter_dict_list):
-    values_list = [list(item.values()) for item in formatter_dict_list]
+def get_sort_list(formatter_list):
+
+    values_list = [list(item.values()) for item in formatter_list]
     sort_list = sorted(values_list, key=lambda x: x[3], reverse=True)
 
     return sort_list
@@ -80,21 +82,21 @@ def get_latest_fruits_list(key_list, sort_list):
 
     result_dict = {list(item.keys())[0]: list(item.values())[0] for item in gruopby_list}
 
-    test_list = [result_dict.get(key, []) for key in key_list]
+    target_fruit_list = [result_dict.get(key, []) for key in key_list]
 
-    sorted_data = [sorted(sublist, key=lambda x: x[0]) for sublist in test_list]
+    sorted_data = [sorted(sublist, key=lambda x: x[0]) for sublist in target_fruit_list]
 
     return sorted_data
 
-def format_bill_list(three_list):
+def format_bill_list(latest_three_list):
 
     bills_list = []
 
-    for onemonth in three_list:
+    for item in latest_three_list:
 
         one_month_bill = []
 
-        for key, group  in itertools.groupby(onemonth, lambda x: x[0]):
+        for key, group  in itertools.groupby(item, lambda x: x[0]):
             group_dict = {key: list(group)}
             test_list = list(group_dict.values())
 
@@ -116,6 +118,7 @@ def format_bill_list(three_list):
     return bills_list
 
 def generate_billinfo_list(bills_list):
+
     rows_list = []
     total_sum_list = []
 
@@ -131,15 +134,17 @@ def generate_billinfo_list(bills_list):
 
     return total_sum_list, rows_list
 
-def generate_bill_list(three_date_list, total_sum_list, rows_list):
+def generate_bill_list(key_list, total_sum_list, rows_list):
+
     format_rows_list = [
             {'month': data, 'all': tsum, 'detail': bill}
-            for data, tsum, bill in zip(three_date_list, total_sum_list, rows_list)
+            for data, tsum, bill in zip(key_list, total_sum_list, rows_list)
         ]
     
     return format_rows_list
 
 def _trimming_list(all_data_list):
+
     trimming_list = [target_list[1:5] for target_list in all_data_list]
 
     return trimming_list
