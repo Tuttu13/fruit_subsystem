@@ -45,9 +45,9 @@ class GetContext():
             fruits_list = statisticsr.format_fruits_list(all_data_list)
             statisticsr.converter_datetime(date_type, fruits_list)
             # ソートしたデータのみ取得
-            sort_list = statisticsr.get_sort_list(fruits_list)
+            sort_fruits_list = statisticsr.get_sort_list(fruits_list)
             # 月付とフルーツ情報を取得
-            latest_three_list = statisticsr.get_latest_fruits_list(monthly_key_list, sort_list)
+            latest_three_list = statisticsr.get_latest_fruits_list(monthly_key_list, sort_fruits_list)
             # 各月別の内訳作成
             bills_list = statisticsr.format_bill_list(latest_three_list)
             # 各月別の集計金額と内訳取得
@@ -75,9 +75,9 @@ class GetContext():
             fruits_list = statisticsr.format_fruits_list(all_data_list)
             statisticsr.converter_datetime(date_type, fruits_list)
             # ソートしたデータのみ取得
-            sort_list = statisticsr.get_sort_list(fruits_list)
+            sort_fruits_list = statisticsr.get_sort_list(fruits_list)
             # 日付とフルーツ情報を取得
-            latest_three_list = statisticsr.get_latest_fruits_list(dately_key_list, sort_list)
+            latest_three_list = statisticsr.get_latest_fruits_list(dately_key_list, sort_fruits_list)
             # 各日別の内訳成形
             bills_list = statisticsr.format_bill_list(latest_three_list)
             # 各日別の集計金額と内訳生成
