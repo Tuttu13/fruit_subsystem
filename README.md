@@ -36,7 +36,7 @@
   クラス内で関数を3つ定義し、画面に出力するデータ(累計、月別、日別)を取得しました。
 - 販売統計情報画面のデータ(累計、月別、日別)生成する関数をモジュール化しました。  
   ```statistics_info/statistics_module.py```を作成しました。
-- 販売統計情報画面の各月別、日別のデータをformat_typeで判断させて、データを生成しました。  
+- 販売統計情報画面の各月別、日別のデータをdate_typeで判断させて、データを生成しました。  
   月別の場合、```"monthly"```  (statistics_info/statistics_views.py L37)  
   日別の場合、```"daily"```  (statistics_info/statistics_views.py L67)  
 - 当月、当日を判断するためにkeyリストを作成し、dict型データからget関数を用いてkeyに該当するvalueを取得する処理にしました。  
